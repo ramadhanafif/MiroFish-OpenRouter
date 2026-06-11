@@ -71,6 +71,24 @@ cd backend && uv sync && uv run python run.py
 cd frontend && npm install && npm run dev
 ```
 
+## Development
+
+Docker is only needed for Neo4j; run the app itself natively for fast iteration:
+
+```bash
+npm run dev:services   # start only the Neo4j container
+npm run dev            # backend (Flask, port 5001) + frontend (Vite, port 3000) natively
+```
+
+Flask runs in debug mode and auto-restarts on backend changes; Vite hot-reloads the frontend. The API is directly curl-able while the app runs:
+
+```bash
+curl http://localhost:5001/health
+curl http://localhost:5001/api/graph/project/list
+```
+
+`npm run lint` runs ruff (backend) and ESLint (frontend). `cd backend && uv run pyrefly check` type-checks (advisory).
+
 ## Configuration
 
 Everything lives in `.env` (copy from `.env.example`):
