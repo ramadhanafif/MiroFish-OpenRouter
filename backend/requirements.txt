@@ -10,9 +10,9 @@ flask>=3.0.0
 flask-cors>=6.0.0
 
 # ============= LLM 相关 =============
-# OpenAI SDK（统一使用 OpenAI 格式调用 LLM / Ollama）
+# OpenAI SDK (any OpenAI-compatible API)
 openai>=1.0.0
-# HTTP client for Ollama embedding API
+# HTTP client for the embeddings API
 requests>=2.28.0
 
 # ============= Neo4j Graph Database =============
@@ -22,6 +22,11 @@ neo4j>=5.15.0
 # OASIS 社交模拟框架
 camel-oasis==0.2.5
 camel-ai==0.2.78
+# CPU-only torch (transitive via sentence-transformers; the default PyPI
+# build pulls ~5 GB of CUDA wheels). The +cpu local version on this index
+# outranks the PyPI CUDA build, so pip resolves the CPU wheel on Linux.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch>=2.0.0
 
 # ============= 文件处理 =============
 PyMuPDF>=1.24.0

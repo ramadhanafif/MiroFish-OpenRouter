@@ -1,7 +1,7 @@
 [project]
 name = "mirofish-offline-backend"
 version = "0.2.0"
-description = "MiroFish-Offline - Offline-first fork running on Neo4j + Ollama"
+description = "MiroFish-Offline - Self-hosted fork running on Neo4j + any OpenAI-compatible API"
 requires-python = ">=3.11"
 license = { text = "AGPL-3.0" }
 authors = [
@@ -22,6 +22,9 @@ dependencies = [
     # OASIS 社交媒体模拟
     "camel-oasis==0.2.5",
     "camel-ai==0.2.78",
+    # Declared explicitly (it's transitive via sentence-transformers) so the
+    # pytorch-cpu index pin in [tool.uv.sources] applies — see below
+    "torch>=2.0.0",
     
     # 文件处理
     "PyMuPDF>=1.24.0",
@@ -40,6 +43,18 @@ dev = [
     "pytest-asyncio>=0.23.0",
     "pipreqs>=0.5.0",
 ]
+
+[tool.uv.sources]
+# CPU-only torch: the default PyPI build on linux x86_64 drags in ~5 GB of
+# nvidia-*-cu12 CUDA wheels that are useless without a GPU. torch is only
+# needed by sentence-transformers (OASIS feed recommendations), which runs
+# fine on CPU.
+torch = [{ index = "pytorch-cpu", marker = "sys_platform == 'linux'" }]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
 
 [build-system]
 requires = ["hatchling"]
