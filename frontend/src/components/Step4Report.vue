@@ -5147,4 +5147,46 @@ watch(() => props.reportId, (newId) => {
 .log-msg.error { color: #EF5350; }
 .log-msg.warning { color: #FFA726; }
 .log-msg.success { color: #66BB6A; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .main-split-layout {
+    flex-direction: column;
+  }
+
+  .left-panel.report-style {
+    width: 100%;
+    min-width: 0;
+    flex: 1 1 55%;
+    min-height: 0;
+    padding: 24px 16px 40px;
+    border-right: none;
+    border-bottom: 1px solid #E5E7EB;
+  }
+
+  .right-panel {
+    flex: 1 1 45%;
+    min-height: 0;
+  }
+
+  .main-title {
+    font-size: 26px;
+  }
+
+  .section-title {
+    font-size: 20px;
+  }
+
+  .section-body {
+    padding-left: 0;
+  }
+
+  .panel-header {
+    padding: 12px;
+  }
+
+  .workflow-overview {
+    padding: 12px 12px 0 12px;
+  }
+}
 </style>

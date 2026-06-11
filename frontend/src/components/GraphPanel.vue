@@ -1420,4 +1420,53 @@ input:checked + .slider:before {
   padding: 3px 6px;
   font-size: 9px;
 }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .panel-header {
+    padding: 12px;
+  }
+
+  .tool-btn {
+    height: 40px;
+    min-width: 40px;
+  }
+
+  .detail-panel {
+    top: 56px;
+    left: 12px;
+    right: 12px;
+    width: auto;
+    max-height: calc(100% - 140px);
+  }
+
+  .graph-legend {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    padding: 10px 12px;
+  }
+
+  .legend-items {
+    max-width: none;
+  }
+
+  .edge-labels-toggle {
+    top: 56px;
+    right: 12px;
+    padding: 6px 10px;
+  }
+
+  .graph-building-hint {
+    bottom: 110px;
+    width: max-content;
+    max-width: calc(100% - 24px);
+    white-space: normal;
+    padding: 8px 14px;
+  }
+
+  .finished-hint .hint-text {
+    white-space: normal;
+  }
+}
 </style>

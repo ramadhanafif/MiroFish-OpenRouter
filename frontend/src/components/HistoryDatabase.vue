@@ -211,10 +211,31 @@ let expandDebounceTimer = null  // Debounce timer
 let pendingState = null  // Records the target state to be executed
 
 // Card layout configuration - adjusted to wider aspect ratio
-const CARDS_PER_ROW = 4
-const CARD_WIDTH = 280
 const CARD_HEIGHT = 280
 const CARD_GAP = 24
+
+// Track viewport width so the card layout adapts to phones and tablets
+const windowWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 1440)
+const handleResize = () => {
+  windowWidth.value = window.innerWidth
+}
+
+// Cards per row, matching available width
+const cardsPerRow = computed(() => {
+  const w = windowWidth.value
+  if (w <= 560) return 1
+  if (w <= 900) return 2
+  if (w <= 1280) return 3
+  return 4
+})
+
+// Card width, kept in sync with the CSS media queries below
+const cardWidth = computed(() => {
+  const w = windowWidth.value
+  if (w <= 768) return 260
+  if (w <= 1200) return 240
+  return 280
+})
 
 // Dynamically calculate container height style
 const containerStyle = computed(() => {
@@ -229,7 +250,7 @@ const containerStyle = computed(() => {
     return { minHeight: '280px' }
   }
 
-  const rows = Math.ceil(total / CARDS_PER_ROW)
+  const rows = Math.ceil(total / cardsPerRow.value)
   // Calculate actual required height: rows * card height + (rows-1) * gap + small bottom spacing
   const expandedHeight = rows * CARD_HEIGHT + (rows - 1) * CARD_GAP + 10
 
@@ -244,18 +265,19 @@ const getCardStyle = (index) => {
     // Expanded state: grid layout
     const transition = 'transform 700ms cubic-bezier(0.23, 1, 0.32, 1), opacity 700ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.3s ease, border-color 0.3s ease'
 
-    const col = index % CARDS_PER_ROW
-    const row = Math.floor(index / CARDS_PER_ROW)
+    const perRow = cardsPerRow.value
+    const width = cardWidth.value
+    const row = Math.floor(index / perRow)
 
     // Calculate card count for current row, ensure each row is centered
-    const currentRowStart = row * CARDS_PER_ROW
-    const currentRowCards = Math.min(CARDS_PER_ROW, total - currentRowStart)
+    const currentRowStart = row * perRow
+    const currentRowCards = Math.min(perRow, total - currentRowStart)
 
-    const rowWidth = currentRowCards * CARD_WIDTH + (currentRowCards - 1) * CARD_GAP
+    const rowWidth = currentRowCards * width + (currentRowCards - 1) * CARD_GAP
 
-    const startX = -(rowWidth / 2) + (CARD_WIDTH / 2)
-    const colInRow = index % CARDS_PER_ROW
-    const x = startX + colInRow * (CARD_WIDTH + CARD_GAP)
+    const startX = -(rowWidth / 2) + (width / 2)
+    const colInRow = index % perRow
+    const x = startX + colInRow * (width + CARD_GAP)
 
     // Expand downward, increase spacing from title
     const y = 20 + row * (CARD_HEIGHT + CARD_GAP)
@@ -273,7 +295,9 @@ const getCardStyle = (index) => {
     const centerIndex = (total - 1) / 2
     const offset = index - centerIndex
 
-    const x = offset * 35
+    // Tighter fan spread on narrow screens so the stack stays inside the viewport
+    const fanSpread = windowWidth.value <= 768 ? 16 : 35
+    const x = offset * fanSpread
     // Adjust starting position, close to title but maintain proper spacing
     const y = 25 + Math.abs(offset) * 8
     const r = offset * 3
@@ -539,6 +563,9 @@ watch(() => route.path, (newPath) => {
 })
 
 onMounted(async () => {
+  // Keep the card layout in sync with the viewport
+  window.addEventListener('resize', handleResize)
+
   // Ensure DOM rendering is complete before loading data
   await nextTick()
   await loadHistory()
@@ -555,6 +582,9 @@ onActivated(() => {
 })
 
 onUnmounted(() => {
+  // Remove resize listener
+  window.removeEventListener('resize', handleResize)
+
   // Clean up Intersection Observer
   if (observer) {
     observer.disconnect()
@@ -1004,10 +1034,18 @@ onUnmounted(() => {
 
 @media (max-width: 768px) {
   .cards-container {
-    padding: 0 20px;
+    padding: 0 16px;
   }
   .project-card {
-    width: 200px;
+    width: 260px;
+  }
+  .section-header {
+    padding: 0 16px;
+    gap: 12px;
+  }
+  .section-title {
+    letter-spacing: 2px;
+    text-align: center;
   }
 }
 
@@ -1336,5 +1374,38 @@ onUnmounted(() => {
   letter-spacing: 0.3px;
   text-align: center;
   line-height: 1.5;
+}
+
+/* Modal responsive tweaks */
+@media (max-width: 768px) {
+  .modal-content {
+    max-width: 94vw;
+  }
+
+  .modal-header {
+    padding: 14px 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .modal-title-section {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .modal-body {
+    padding: 16px;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px 16px;
+  }
+
+  .modal-btn {
+    min-height: 44px;
+    padding: 12px;
+  }
 }
 </style>

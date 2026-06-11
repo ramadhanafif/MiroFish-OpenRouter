@@ -2571,4 +2571,105 @@ watch(() => props.simulationId, (newId) => {
   border-top: 1px solid #E5E7EB;
   margin: 24px 0;
 }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .main-split-layout {
+    flex-direction: column;
+  }
+
+  .left-panel.report-style {
+    width: 100%;
+    min-width: 0;
+    flex: 1 1 50%;
+    min-height: 0;
+    padding: 24px 16px 40px;
+    border-right: none;
+    border-bottom: 1px solid #E5E7EB;
+  }
+
+  .right-panel {
+    flex: 1 1 50%;
+    min-height: 0;
+  }
+
+  .main-title {
+    font-size: 26px;
+  }
+
+  .section-title {
+    font-size: 20px;
+  }
+
+  .section-body {
+    padding-left: 0;
+  }
+
+  .action-bar {
+    flex-wrap: wrap;
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .action-bar-header {
+    min-width: 0;
+  }
+
+  .action-bar-tabs {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .tab-pill {
+    min-height: 40px;
+  }
+
+  .agent-pill {
+    width: auto;
+    flex: 1;
+    min-width: 140px;
+  }
+
+  .dropdown-menu {
+    min-width: 0;
+    width: 260px;
+    max-width: 86vw;
+  }
+
+  .interaction-header {
+    padding: 12px;
+  }
+
+  .target-selector {
+    padding: 12px;
+  }
+
+  .chat-messages {
+    padding: 16px 12px;
+  }
+
+  .message-content {
+    max-width: 85%;
+  }
+
+  .chat-input-area {
+    padding: 12px;
+  }
+
+  .tools-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .survey-setup {
+    padding: 16px 12px;
+  }
+
+  .survey-results {
+    padding: 16px 12px;
+  }
+
+  .agents-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
 </style>

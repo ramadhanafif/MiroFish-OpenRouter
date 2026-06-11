@@ -2057,4 +2057,72 @@ onUnmounted(() => {
       display: none;
   }
 }
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0 12px;
+  }
+
+  .nav-brand {
+    font-size: 0.8rem;
+  }
+
+  .step-name {
+    display: none;
+  }
+
+  .status-text {
+    display: none;
+  }
+
+  .panel-header {
+    height: auto;
+    min-height: 50px;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 10px 12px;
+  }
+
+  .header-right {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .action-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .detail-panel {
+    left: 12px;
+    right: 12px;
+    width: auto;
+  }
+
+  .graph-legend {
+    gap: 10px;
+    padding: 10px 12px;
+  }
+
+  .process-content {
+    padding: 16px 12px;
+  }
+
+  .phase-header {
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .next-step-btn {
+    min-height: 48px;
+  }
+
+  .project-header {
+    padding: 10px 12px;
+  }
+
+  .project-details {
+    padding: 12px;
+  }
+}
 </style>

@@ -2628,4 +2628,92 @@ onUnmounted(() => {
 .auto-advance-hint:hover {
   color: var(--text-primary, #ccc);
 }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .scroll-container {
+    padding: 16px 12px;
+    gap: 14px;
+  }
+
+  .step-card {
+    padding: 16px;
+  }
+
+  .action-btn {
+    min-height: 44px;
+  }
+
+  .action-group {
+    flex-wrap: wrap;
+  }
+
+  .action-group.dual {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid {
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .profiles-list {
+    grid-template-columns: 1fr;
+  }
+
+  .agents-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .config-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .platforms-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .persona-dimensions {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-info-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .rounds-header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .auto-info-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .auto-value {
+    padding-right: 0;
+    border-right: none;
+  }
+
+  .profile-modal {
+    width: 94%;
+    max-height: 90vh;
+  }
+
+  .modal-header {
+    padding: 16px;
+  }
+
+  .modal-body {
+    padding: 16px;
+  }
+
+  .narrative-box {
+    padding: 16px;
+  }
+}
 </style>

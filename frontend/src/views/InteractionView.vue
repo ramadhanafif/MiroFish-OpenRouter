@@ -347,4 +347,64 @@ onMounted(() => {
 .panel-wrapper.left {
   border-right: 1px solid #EAEAEA;
 }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .app-header {
+    height: auto;
+    min-height: 52px;
+    flex-wrap: wrap;
+    padding: 8px 12px;
+    gap: 8px 12px;
+  }
+
+  .brand {
+    font-size: 14px;
+  }
+
+  .header-center {
+    position: static;
+    transform: none;
+    order: 3;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .switch-btn {
+    padding: 10px 14px;
+    min-height: 44px;
+  }
+
+  .header-right {
+    gap: 10px;
+    margin-left: auto;
+  }
+
+  .workflow-step {
+    font-size: 12px;
+  }
+
+  .content-area {
+    flex-direction: column;
+  }
+
+  .panel-wrapper {
+    width: 100% !important;
+    transform: none !important;
+    height: auto;
+    flex: 1 1 50%;
+    min-height: 0;
+  }
+
+  /* Hide panels collapsed to zero width by the view switcher */
+  .panel-wrapper[style*="width: 0%"] {
+    display: none;
+  }
+
+  .panel-wrapper.left {
+    border-right: none;
+    border-bottom: 1px solid #EAEAEA;
+  }
+}
 </style>

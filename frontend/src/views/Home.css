@@ -564,3 +564,74 @@
     margin-bottom: 20px;
   }
 }
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0 20px;
+  }
+
+  .main-content {
+    padding: 32px 20px;
+  }
+
+  .main-title {
+    font-size: 2.5rem;
+    letter-spacing: -1px;
+    margin-bottom: 28px;
+  }
+
+  .hero-section {
+    margin-bottom: 48px;
+  }
+
+  .hero-desc {
+    font-size: 0.95rem;
+    margin-bottom: 32px;
+  }
+
+  .hero-right {
+    align-items: flex-start;
+  }
+
+  .logo-container {
+    justify-content: flex-start;
+    padding-right: 0;
+  }
+
+  .scroll-down-btn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .dashboard-section {
+    gap: 40px;
+    padding-top: 40px;
+  }
+
+  .metrics-row {
+    flex-wrap: wrap;
+  }
+
+  .metric-card {
+    flex: 1 1 calc(50% - 10px);
+    min-width: 0;
+    padding: 16px 20px;
+  }
+
+  .steps-container {
+    padding: 20px;
+  }
+
+  .console-section {
+    padding: 14px;
+  }
+
+  .code-input {
+    padding: 14px;
+  }
+
+  .start-engine-btn {
+    padding: 16px;
+    font-size: 1rem;
+  }
+}

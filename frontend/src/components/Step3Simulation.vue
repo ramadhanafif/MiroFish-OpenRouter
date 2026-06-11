@@ -1286,4 +1286,80 @@ onUnmounted(() => {
 .auto-advance-hint:hover {
   color: var(--text-primary, #ccc);
 }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .control-bar {
+    height: auto;
+    min-height: 64px;
+    flex-wrap: wrap;
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .status-group {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .platform-status {
+    flex: 1 1 calc(50% - 4px);
+    min-width: 0;
+  }
+
+  .action-controls {
+    width: 100%;
+  }
+
+  .action-controls .action-btn {
+    width: 100%;
+    justify-content: center;
+    min-height: 44px;
+  }
+
+  .timeline-header {
+    padding: 8px 12px;
+  }
+
+  .timeline-stats {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .timeline-feed {
+    padding: 16px 0;
+  }
+
+  /* Single-column timeline: axis moves to the left edge */
+  .timeline-axis {
+    left: 16px;
+    transform: none;
+  }
+
+  .timeline-marker {
+    left: 16px;
+  }
+
+  .timeline-item {
+    margin-bottom: 20px;
+  }
+
+  .timeline-item.twitter,
+  .timeline-item.reddit {
+    justify-content: flex-start;
+    padding: 0 12px 0 32px;
+  }
+
+  .timeline-item.twitter .timeline-card,
+  .timeline-item.reddit .timeline-card {
+    width: 100%;
+    margin: 0;
+  }
+
+  .timeline-card {
+    padding: 12px 14px;
+  }
+}
 </style>

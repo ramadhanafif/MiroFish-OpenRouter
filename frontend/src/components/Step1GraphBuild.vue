@@ -721,4 +721,35 @@ watch(() => props.systemLogs.length, () => {
 .auto-advance-hint:hover {
   color: var(--text-primary, #ccc);
 }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .scroll-container {
+    padding: 16px 12px;
+    gap: 14px;
+  }
+
+  .step-card {
+    padding: 16px;
+  }
+
+  .stats-grid {
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .action-btn {
+    min-height: 44px;
+  }
+
+  .ontology-detail-overlay {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+  }
+
+  .log-time {
+    min-width: 60px;
+  }
+}
 </style>
