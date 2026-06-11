@@ -1594,14 +1594,26 @@ def start_simulation():
                 }), 400
             
             logger.info(f"Enable knowledge graph memory update: simulation_id={simulation_id}, graph_id={graph_id}")
-        
+
+        # Graph memory update writes simulation events back into Neo4j and
+        # therefore needs the storage instance from app.extensions
+        storage = None
+        if enable_graph_memory_update:
+            storage = current_app.extensions.get('neo4j_storage')
+            if storage is None:
+                return jsonify({
+                    "success": False,
+                    "error": "Graph memory update requires Neo4j, but the graph database is not connected"
+                }), 503
+
         # Start simulation
         run_state = SimulationRunner.start_simulation(
             simulation_id=simulation_id,
             platform=platform,
             max_rounds=max_rounds,
             enable_graph_memory_update=enable_graph_memory_update,
-            graph_id=graph_id
+            graph_id=graph_id,
+            storage=storage
         )
         
         # Update simulation status
