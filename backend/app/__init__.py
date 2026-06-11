@@ -71,8 +71,39 @@ def create_app(config_class=Config):
     @app.after_request
     def log_response(response):
         logger = get_logger('mirofish.request')
-        logger.debug(f"Response: {response.status_code}")
+        if response.status_code >= 500:
+            logger.error(f"{request.method} {request.path} -> {response.status_code}")
+        elif response.status_code >= 400:
+            logger.warning(f"{request.method} {request.path} -> {response.status_code}")
+        else:
+            logger.debug(f"Response: {response.status_code}")
         return response
+
+    # Unhandled exceptions: log the full traceback and return JSON instead
+    # of an HTML error page, so the frontend can show a usable message
+    @app.errorhandler(Exception)
+    def handle_unhandled_exception(e):
+        from werkzeug.exceptions import HTTPException
+        if isinstance(e, HTTPException):
+            return e
+        logger = get_logger('mirofish.error')
+        logger.exception(f"Unhandled exception on {request.method} {request.path}: {e}")
+        return {
+            'success': False,
+            'error': f"Internal server error: {e}",
+        }, 500
+
+    # Frontend error reporting: browser-side errors land in the backend log
+    # so they are visible without opening the browser console
+    @app.route('/api/logs/frontend', methods=['POST'])
+    def log_frontend_error():
+        logger = get_logger('mirofish.frontend')
+        data = request.get_json(silent=True) or {}
+        message = str(data.get('message', ''))[:2000]
+        source = str(data.get('source', ''))[:500]
+        stack = str(data.get('stack', ''))[:4000]
+        logger.warning(f"[browser] {message} | source={source}" + (f"\n{stack}" if stack else ""))
+        return {'success': True}
 
     # Register blueprints
     from .api import graph_bp, report_bp, simulation_bp

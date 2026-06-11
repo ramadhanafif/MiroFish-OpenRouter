@@ -37,7 +37,11 @@ service.interceptors.response.use(
     return res
   },
   error => {
-    console.error('Response error:', error)
+    const cfg = error.config || {}
+    const status = error.response?.status
+    const detail = error.response?.data?.error || error.message
+    console.error(`API ${(cfg.method || 'GET').toUpperCase()} ${cfg.url} failed` +
+      (status ? ` (HTTP ${status})` : '') + `: ${detail}`)
 
     // Handle timeout
     if (error.code === 'ECONNABORTED' && error.message.includes('timeout')) {
