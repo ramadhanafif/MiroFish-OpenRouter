@@ -1,8 +1,11 @@
 import axios from 'axios'
 
 // Create axios instance
+// Default to same-origin requests: /api/* is forwarded to the backend by the
+// Vite dev-server proxy, so the app works from any host, not just localhost.
+// Set VITE_API_BASE_URL only when the backend lives on a different origin.
 const service = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001',
+  baseURL: import.meta.env.VITE_API_BASE_URL || '',
   timeout: 300000, // 5 minute timeout (ontology generation may require longer time)
   headers: {
     'Content-Type': 'application/json'
