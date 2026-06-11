@@ -1307,12 +1307,17 @@ class ReportAgent:
                     f"Deep retrieval and writing in progress ({tool_calls_count}/{self.MAX_TOOL_CALLS_PER_SECTION})"
                 )
             
-            # Call LLM
-            response = self.llm.chat(
-                messages=messages,
-                temperature=0.5,
-                max_tokens=4096
-            )
+            # Call LLM. Empty content (after the client's own retries) is
+            # tolerated here: the ReACT loop nudges the model and continues.
+            try:
+                response = self.llm.chat(
+                    messages=messages,
+                    temperature=0.5,
+                    max_tokens=4096
+                )
+            except ValueError as e:
+                logger.warning(f"Section {section.title}: {e}")
+                response = None
 
             # Check if LLM return is None (API exception or empty content)
             if response is None:
@@ -1633,7 +1638,7 @@ class ReportAgent:
             )
             ReportManager.save_report(report)
             
-            logger.info(f"outlinesavedtofile: {report_id}/outline.json")
+            logger.info(f"Outline saved to file: {report_id}/outline.json")
             
             # Phase 2: Sequentially generate sectionsgeneration (per sectionsave）
             report.status = ReportStatus.GENERATING
@@ -1729,14 +1734,14 @@ class ReportAgent:
             # savefinalReport
             ReportManager.save_report(report)
             ReportManager.update_progress(
-                report_id, "completed", 100, "reportgeneratecomplete",
+                report_id, "completed", 100, "Report generation complete",
                 completed_sections=completed_section_titles
             )
             
             if progress_callback:
-                progress_callback("completed", 100, "reportgeneratecomplete")
+                progress_callback("completed", 100, "Report generation complete")
             
-            logger.info(f"reportgeneratecomplete: {report_id}")
+            logger.info(f"Report generation complete: {report_id}")
             
             # Closeconsoleloglogger
             if self.console_logger:
@@ -1746,7 +1751,7 @@ class ReportAgent:
             return report
             
         except Exception as e:
-            logger.error(f"reportgeneratefailed: {str(e)}")
+            logger.error(f"Report generation failed: {str(e)}")
             report.status = ReportStatus.FAILED
             report.error = str(e)
             
@@ -1758,7 +1763,7 @@ class ReportAgent:
             try:
                 ReportManager.save_report(report)
                 ReportManager.update_progress(
-                    report_id, "failed", -1, f"reportgeneratefailed: {str(e)}",
+                    report_id, "failed", -1, f"Report generation failed: {str(e)}",
                     completed_sections=completed_section_titles
                 )
             except Exception:
@@ -2096,7 +2101,7 @@ class ReportManager:
         with open(cls._get_outline_path(report_id), 'w', encoding='utf-8') as f:
             json.dump(outline.to_dict(), f, ensure_ascii=False, indent=2)
         
-        logger.info(f"outlinesaved: {report_id}")
+        logger.info(f"Outline saved: {report_id}")
     
     @classmethod
     def save_section(
@@ -2234,7 +2239,7 @@ class ReportManager:
     
     @classmethod
     def get_progress(cls, report_id: str) -> Optional[Dict[str, Any]]:
-        """getreportgenerateprogress"""
+        """Get report generation progress"""
         path = cls._get_progress_path(report_id)
         
         if not os.path.exists(path):
@@ -2448,7 +2453,7 @@ class ReportManager:
             with open(cls._get_report_markdown_path(report.report_id), 'w', encoding='utf-8') as f:
                 f.write(report.markdown_content)
         
-        logger.info(f"reportsaved: {report.report_id}")
+        logger.info(f"Report saved: {report.report_id}")
     
     @classmethod
     def get_report(cls, report_id: str) -> Optional[Report]:

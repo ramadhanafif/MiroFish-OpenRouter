@@ -4,11 +4,14 @@ Unified OpenAI format API calls (OpenRouter, OpenAI, or any compatible server)
 """
 
 import json
+import logging
 import re
 from typing import Optional, Dict, Any, List
 from openai import OpenAI
 
 from ..config import Config
+
+logger = logging.getLogger(__name__)
 
 
 class LLMClient:
@@ -39,7 +42,8 @@ class LLMClient:
         messages: List[Dict[str, str]],
         temperature: float = 0.7,
         max_tokens: int = 4096,
-        response_format: Optional[Dict] = None
+        response_format: Optional[Dict] = None,
+        retries: int = 2
     ) -> str:
         """
         Send chat request
@@ -49,6 +53,9 @@ class LLMClient:
             temperature: Temperature parameter
             max_tokens: Max token count
             response_format: Response format (e.g., JSON mode)
+            retries: Extra attempts when the model returns empty content
+                     (some models emit native tool-call tokens with no text
+                     even when no tools are requested)
 
         Returns:
             Model response text
@@ -63,20 +70,30 @@ class LLMClient:
         if response_format:
             kwargs["response_format"] = response_format
 
-        response = self.client.chat.completions.create(**kwargs)
-        content = response.choices[0].message.content
-        if content is None:
+        finish_reason = None
+        for attempt in range(retries + 1):
+            response = self.client.chat.completions.create(**kwargs)
+            content = response.choices[0].message.content
+            if content:
+                # Some models (like MiniMax M2.5) include <think>thinking content in response, need to remove
+                return re.sub(r'<think>[\s\S]*?</think>', '', content).strip()
             finish_reason = response.choices[0].finish_reason
-            raise ValueError(f"LLM returned empty content (finish_reason={finish_reason})")
-        # Some models (like MiniMax M2.5) include <think>thinking content in response, need to remove
-        content = re.sub(r'<think>[\s\S]*?</think>', '', content).strip()
-        return content
+            if attempt < retries:
+                logger.warning(
+                    f"LLM returned empty content (finish_reason={finish_reason}), "
+                    f"retrying ({attempt + 1}/{retries})"
+                )
+        raise ValueError(
+            f"LLM returned empty content after {retries + 1} attempts "
+            f"(finish_reason={finish_reason})"
+        )
 
     def chat_json(
         self,
         messages: List[Dict[str, str]],
         temperature: float = 0.3,
-        max_tokens: int = 4096
+        max_tokens: int = 4096,
+        retries: int = 2
     ) -> Dict[str, Any]:
         """
         Send chat request and return JSON
@@ -85,16 +102,35 @@ class LLMClient:
             messages: Message list
             temperature: Temperature parameter
             max_tokens: Max token count
+            retries: Extra attempts when the model returns invalid JSON.
+                     Models occasionally produce degenerate output (e.g.
+                     endless repetition); a fresh sample usually parses.
 
         Returns:
             Parsed JSON object
         """
-        response = self.chat(
-            messages=messages,
-            temperature=temperature,
-            max_tokens=max_tokens,
-            response_format={"type": "json_object"}
-        )
+        last_error = None
+        for attempt in range(retries + 1):
+            try:
+                response = self.chat(
+                    messages=messages,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                    response_format={"type": "json_object"}
+                )
+                return self._parse_json(response)
+            except ValueError as e:
+                last_error = e
+                if attempt < retries:
+                    logger.warning(
+                        f"LLM JSON response invalid, retrying ({attempt + 1}/{retries}): "
+                        f"{str(e)[:200]}"
+                    )
+        raise last_error
+
+    @staticmethod
+    def _parse_json(response: str) -> Dict[str, Any]:
+        """Parse a JSON object out of an LLM response, tolerating markdown fences and prose."""
         # Clean markdown code block markers
         cleaned_response = response.strip()
         cleaned_response = re.sub(r'^```(?:json)?\s*\n?', '', cleaned_response, flags=re.IGNORECASE)
