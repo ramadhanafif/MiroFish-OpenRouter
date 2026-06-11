@@ -17,7 +17,7 @@
 
 Upload a document (press release, policy draft, financial report) and MiroFish builds a knowledge graph from it, generates hundreds of AI agent personas, and simulates their reaction on social media — posts, arguments, opinion shifts — then writes an analysis report.
 
-The [original MiroFish](https://github.com/666ghj/MiroFish) targets the Chinese market and depends on cloud services (Zep Cloud, DashScope). This fork is self-hosted and provider-agnostic.
+The [original MiroFish](https://github.com/666ghj/MiroFish) targets the Chinese market and depends on cloud services (Zep Cloud, DashScope). [MiroFish-Offline](https://github.com/nikmcfly/MiroFish-Offline) made it self-hosted and English; this fork builds on it to make it provider-agnostic.
 
 ## What this fork brings
 
@@ -104,4 +104,4 @@ EMBEDDING_DIMENSIONS=1536
 
 ## License & Credits
 
-AGPL-3.0, same as upstream. Fork of [MiroFish](https://github.com/666ghj/MiroFish) by [666ghj](https://github.com/666ghj); simulation engine powered by [OASIS](https://github.com/camel-ai/oasis) from the CAMEL-AI team.
+AGPL-3.0, same as upstream. Fork of [MiroFish-Offline](https://github.com/nikmcfly/MiroFish-Offline) by [nikmcfly](https://github.com/nikmcfly), itself a fork of [MiroFish](https://github.com/666ghj/MiroFish) by [666ghj](https://github.com/666ghj); simulation engine powered by [OASIS](https://github.com/camel-ai/oasis) from the CAMEL-AI team.
