@@ -1,0 +1,12 @@
+/* Tailwind v4 entry. Preflight is intentionally NOT imported so Tailwind's
+   global resets cannot disturb the scoped CSS in the older components.
+   Hybrid adoption: new UI uses utilities; existing Step components keep
+   their scoped styles. */
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+@theme {
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-sans: 'Space Grotesk', 'Noto Sans SC', system-ui, sans-serif;
+  --color-accent: #FF4500;
+}

@@ -1,86 +1,86 @@
 <template>
-  <div class="home-container">
+  <div class="min-h-screen bg-white font-sans text-black">
     <!-- Top Navigation Bar -->
-    <nav class="navbar" :style="s.navbar">
-      <div class="nav-brand" :style="s.navBrand">MIROFISH OFFLINE</div>
-      <div class="nav-links" :style="s.navLinks">
-        <router-link to="/settings" class="settings-link" :style="s.githubLink">
+    <nav class="flex h-[60px] items-center justify-between bg-black px-10 text-white max-md:px-5">
+      <div class="font-mono text-[1.2rem] font-extrabold tracking-[1px]">MIROFISH OFFLINE</div>
+      <div class="flex items-center gap-7">
+        <router-link to="/settings" class="flex items-center gap-2 font-mono text-[0.9rem] font-medium text-white no-underline transition-opacity hover:opacity-80">
           Settings <span>⚙</span>
         </router-link>
-        <a href="https://github.com/nikmcfly/MiroFish-Offline" target="_blank" class="github-link" :style="s.githubLink">
+        <a href="https://github.com/nikmcfly/MiroFish-Offline" target="_blank" class="flex items-center gap-2 font-mono text-[0.9rem] font-medium text-white no-underline transition-opacity hover:opacity-80">
           Visit our Github <span>↗</span>
         </a>
       </div>
     </nav>
 
-    <div class="main-content" :style="s.mainContent">
+    <div class="mx-auto max-w-[1400px] px-10 py-[60px] max-md:px-5 max-md:py-8">
       <!-- Hero Section -->
-      <section class="hero-section" :style="s.heroSection">
-        <div class="hero-left" :style="s.heroLeft">
-          <div class="tag-row" :style="s.tagRow">
-            <span class="orange-tag" :style="s.orangeTag">Offline Multi-Agent Simulation Engine</span>
-            <span class="version-text" :style="s.versionText">/ v0.1-preview</span>
+      <section class="relative mb-20 flex justify-between max-lg:flex-col max-md:mb-12">
+        <div class="flex-1 pr-[60px] max-lg:mb-10 max-lg:pr-0">
+          <div class="mb-6 flex items-center gap-[15px] font-mono text-[0.8rem]">
+            <span class="bg-accent px-2.5 py-1 text-[0.75rem] font-bold tracking-[1px] text-white">Offline Multi-Agent Simulation Engine</span>
+            <span class="font-medium tracking-[0.5px] text-[#999]">/ v0.1-preview</span>
           </div>
 
-          <h1 class="main-title" :style="s.mainTitle">
+          <h1 class="m-0 mb-10 text-[4.5rem] font-medium leading-[1.2] tracking-[-2px] text-black max-md:mb-7 max-md:text-[2.5rem] max-md:tracking-[-1px]">
             Upload Any Document<br>
-            <span class="gradient-text" :style="s.gradientText">Predict What Happens Next</span>
+            <span class="gradient-text">Predict What Happens Next</span>
           </h1>
 
-          <div class="hero-desc" :style="s.heroDesc">
-            <p :style="s.heroDescP">
-              From a single document, <span :style="s.highlightBold">MiroFish Offline</span> extracts reality seeds and builds a parallel world of <span :style="s.highlightOrange">autonomous AI agents</span> that runs entirely on your machine. Inject variables, observe emergent behavior, and find <span :style="s.highlightCode">"local optima"</span> in complex social dynamics.
+          <div class="mb-[50px] max-w-[640px] text-justify text-[1.05rem] font-normal leading-[1.8] text-[#666] max-md:mb-8 max-md:text-[0.95rem]">
+            <p class="mb-6">
+              From a single document, <span class="font-bold text-black">MiroFish Offline</span> extracts reality seeds and builds a parallel world of <span class="font-mono font-bold text-accent">autonomous AI agents</span> that runs entirely on your machine. Inject variables, observe emergent behavior, and find <span class="rounded-[2px] bg-black/5 px-1.5 py-0.5 font-mono text-[0.9em] font-semibold text-black">"local optima"</span> in complex social dynamics.
             </p>
-            <p class="slogan-text" :style="s.sloganText">
-              Your data never leaves your machine. The future is simulated locally<span :style="s.blinkingCursor">_</span>
+            <p class="mt-5 border-l-[3px] border-accent pl-4 text-[1.2rem] font-[520] tracking-[1px] text-black">
+              Your data never leaves your machine. The future is simulated locally<span class="blinking-cursor font-bold text-accent">_</span>
             </p>
           </div>
 
-          <div class="decoration-square" :style="s.decorationSquare"></div>
+          <div class="h-4 w-4 bg-accent"></div>
         </div>
 
-        <div class="hero-right" :style="s.heroRight">
-          <div class="logo-container" :style="s.logoContainer">
-            <img src="../assets/logo/MiroFish_logo_left.jpeg" alt="MiroFish Logo" :style="s.heroLogo" />
+        <div class="flex flex-[0.8] flex-col items-end justify-between max-md:items-start">
+          <div class="flex w-full justify-end pr-10 max-md:justify-start max-md:pr-0">
+            <img src="../assets/logo/MiroFish_logo_left.jpeg" alt="MiroFish Logo" class="w-full max-w-[500px] max-lg:mb-5 max-lg:max-w-[200px]" />
           </div>
-          <button :style="s.scrollDownBtn" @click="scrollToBottom">↓</button>
+          <button class="flex h-10 w-10 cursor-pointer items-center justify-center border border-[#E5E5E5] bg-transparent text-[1.2rem] text-accent transition-all hover:border-accent max-md:h-11 max-md:w-11" @click="scrollToBottom">↓</button>
         </div>
       </section>
 
       <!-- Dashboard: Two-Column Layout -->
-      <section class="dashboard-section" :style="s.dashboardSection">
+      <section class="flex items-start gap-[60px] border-t border-[#E5E5E5] pt-[60px] max-lg:flex-col max-md:gap-10 max-md:pt-10">
         <!-- Left Column: Status & Steps -->
-        <div class="left-panel" :style="s.leftPanel">
-          <div class="panel-header" :style="s.panelHeader">
-            <span :style="s.statusDot">■</span> System Status
+        <div class="flex flex-[0.8] flex-col">
+          <div class="mb-5 flex items-center gap-2 font-mono text-[0.8rem] text-[#999]">
+            <span class="text-[0.8rem] text-accent">■</span> System Status
           </div>
 
-          <h2 class="section-title" :style="s.sectionTitle">Ready</h2>
-          <p class="section-desc" :style="s.sectionDesc">
+          <h2 class="m-0 mb-4 text-[2rem] font-[520]">Ready</h2>
+          <p class="mb-6 leading-[1.6] text-[#666]">
             Local prediction engine on standby. Upload unstructured data to initialize a simulation.
           </p>
 
-          <div class="metrics-row" :style="s.metricsRow">
-            <div class="metric-card" :style="s.metricCard">
-              <div class="metric-value" :style="s.metricValue">Free</div>
-              <div class="metric-label" :style="s.metricLabel">Runs on your hardware</div>
+          <div class="mb-4 flex gap-5 max-md:flex-wrap">
+            <div class="min-w-[150px] border border-[#E5E5E5] px-[30px] py-5 max-md:min-w-0 max-md:flex-[1_1_calc(50%-10px)] max-md:px-5 max-md:py-4">
+              <div class="mb-1 font-mono text-[1.8rem] font-[520]">Free</div>
+              <div class="text-[0.85rem] text-[#999]">Runs on your hardware</div>
             </div>
-            <div class="metric-card" :style="s.metricCard">
-              <div class="metric-value" :style="s.metricValue">Private</div>
-              <div class="metric-label" :style="s.metricLabel">100% offline, no cloud</div>
+            <div class="min-w-[150px] border border-[#E5E5E5] px-[30px] py-5 max-md:min-w-0 max-md:flex-[1_1_calc(50%-10px)] max-md:px-5 max-md:py-4">
+              <div class="mb-1 font-mono text-[1.8rem] font-[520]">Private</div>
+              <div class="text-[0.85rem] text-[#999]">100% offline, no cloud</div>
             </div>
           </div>
 
-          <div class="steps-container" :style="s.stepsContainer">
-            <div class="steps-header" :style="s.stepsHeader">
-               <span :style="s.diamondIcon">◇</span> Workflow Sequence
+          <div class="relative border border-[#E5E5E5] p-[30px] max-md:p-5">
+            <div class="mb-6 flex items-center gap-2 font-mono text-[0.8rem] text-[#999]">
+              <span class="text-[1.2rem] leading-none">◇</span> Workflow Sequence
             </div>
-            <div :style="s.workflowList">
-              <div v-for="(step, i) in steps" :key="i" :style="s.workflowItem">
-                <span :style="s.stepNum">{{ step.num }}</span>
-                <div :style="s.stepInfo">
-                  <div :style="s.stepTitle">{{ step.title }}</div>
-                  <div :style="s.stepDesc">{{ step.desc }}</div>
+            <div class="flex flex-col gap-5">
+              <div v-for="(step, i) in steps" :key="i" class="flex items-start gap-5">
+                <span class="font-mono font-bold text-black opacity-30">{{ step.num }}</span>
+                <div class="flex-1">
+                  <div class="mb-1 text-base font-[520]">{{ step.title }}</div>
+                  <div class="text-[0.85rem] text-[#666]">{{ step.desc }}</div>
                 </div>
               </div>
             </div>
@@ -88,50 +88,51 @@
         </div>
 
         <!-- Right Column: Interactive Console -->
-        <div class="right-panel" :style="s.rightPanel">
-          <div class="console-box" :style="s.consoleBox">
-            <div :style="s.consoleSection">
-              <div class="console-header" :style="s.consoleHeader">
+        <div class="flex flex-[1.2] flex-col max-lg:w-full">
+          <div class="border border-[#CCC] p-2">
+            <div class="p-5 max-md:p-3.5">
+              <div class="mb-4 flex justify-between font-mono text-[0.75rem] text-[#666]">
                 <span>01 / Reality Seeds</span>
                 <span>Supported: PDF, MD, TXT</span>
               </div>
               <div
-                :style="s.uploadZone"
+                class="flex h-[200px] cursor-pointer items-center justify-center overflow-y-auto border border-dashed bg-[#FAFAFA] hover:border-[#999] hover:bg-[#F0F0F0]"
+                :class="isDragOver ? 'border-accent bg-[#F0F0F0]' : 'border-[#CCC]'"
                 @dragover.prevent="handleDragOver"
                 @dragleave.prevent="handleDragLeave"
                 @drop.prevent="handleDrop"
                 @click="triggerFileInput"
               >
                 <input ref="fileInput" type="file" multiple accept=".pdf,.md,.txt" @change="handleFileSelect" style="display: none" :disabled="loading" />
-                <div v-if="files.length === 0" :style="s.uploadPlaceholder">
-                  <div :style="s.uploadIcon">↑</div>
-                  <div :style="s.uploadTitle">Drag & drop files here</div>
-                  <div :style="s.uploadHint">or click to browse</div>
+                <div v-if="files.length === 0" class="text-center">
+                  <div class="mx-auto mb-4 flex h-10 w-10 items-center justify-center border border-[#DDD] text-[#999]">↑</div>
+                  <div class="mb-1 text-[0.9rem] font-medium">Drag & drop files here</div>
+                  <div class="font-mono text-[0.75rem] text-[#999]">or click to browse</div>
                 </div>
-                <div v-else :style="s.fileList">
-                  <div v-for="(file, index) in files" :key="index" :style="s.fileItem">
+                <div v-else class="flex w-full flex-col gap-2.5 self-start p-4">
+                  <div v-for="(file, index) in files" :key="index" class="flex items-center border border-[#EEE] bg-white px-3 py-2 font-mono text-[0.85rem]">
                     <span>📄</span>
-                    <span :style="s.fileName">{{ file.name }}</span>
-                    <button @click.stop="removeFile(index)" :style="s.removeBtn">×</button>
+                    <span class="mx-2.5 flex-1">{{ file.name }}</span>
+                    <button @click.stop="removeFile(index)" class="cursor-pointer border-none bg-transparent text-[1.2rem] text-[#999]">×</button>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div :style="s.consoleDivider"><span :style="s.consoleDividerText">Parameters</span></div>
+            <div class="my-2.5 flex items-center border-t border-[#EEE]"><span class="px-4 font-mono text-[0.7rem] tracking-[1px] text-[#BBB]">Parameters</span></div>
 
-            <div :style="s.consoleSection">
-              <div class="console-header" :style="s.consoleHeader">
+            <div class="p-5 max-md:p-3.5">
+              <div class="mb-4 flex justify-between font-mono text-[0.75rem] text-[#666]">
                 <span>>_ 02 / Simulation Prompt</span>
               </div>
-              <div :style="s.inputWrapper">
-                <textarea v-model="formData.simulationRequirement" :style="s.codeInput" placeholder="// Describe your simulation or prediction goal in natural language" rows="6" :disabled="loading"></textarea>
-                <div :style="s.modelBadge">Engine: OpenRouter + Neo4j</div>
+              <div class="relative border border-[#DDD] bg-[#FAFAFA]">
+                <textarea v-model="formData.simulationRequirement" class="min-h-[150px] w-full resize-y border-none bg-transparent p-5 font-mono text-[0.9rem] leading-[1.6] outline-none max-md:p-3.5" placeholder="// Describe your simulation or prediction goal in natural language" rows="6" :disabled="loading"></textarea>
+                <div class="absolute bottom-2.5 right-4 font-mono text-[0.7rem] text-[#AAA]">Engine: OpenRouter + Neo4j</div>
               </div>
             </div>
 
-            <div :style="s.btnSection">
-              <button :style="s.startEngineBtn" @click="startSimulation" :disabled="!canSubmit || loading">
+            <div class="px-5 pb-5">
+              <button class="start-engine-btn flex w-full items-center justify-between p-5 font-mono text-[1.1rem] font-bold tracking-[1px] text-white max-md:p-4 max-md:text-base" @click="startSimulation" :disabled="!canSubmit || loading">
                 <span v-if="!loading">Start Engine</span>
                 <span v-else>Initializing...</span>
                 <span>→</span>
@@ -147,78 +148,9 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import HistoryDatabase from '../components/HistoryDatabase.vue'
-
-const mono = 'JetBrains Mono, monospace'
-const sans = 'Space Grotesk, Noto Sans SC, system-ui, sans-serif'
-
-const s = reactive({
-  navbar: { height: '60px', background: '#000', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 40px' },
-  navBrand: { fontFamily: mono, fontWeight: '800', letterSpacing: '1px', fontSize: '1.2rem' },
-  navLinks: { display: 'flex', alignItems: 'center', gap: '28px' },
-  githubLink: { color: '#fff', textDecoration: 'none', fontFamily: mono, fontSize: '0.9rem', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px' },
-  mainContent: { maxWidth: '1400px', margin: '0 auto', padding: '60px 40px' },
-  heroSection: { display: 'flex', justifyContent: 'space-between', marginBottom: '80px', position: 'relative' },
-  heroLeft: { flex: '1', paddingRight: '60px' },
-  tagRow: { display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '25px', fontFamily: mono, fontSize: '0.8rem' },
-  orangeTag: { background: '#FF4500', color: '#fff', padding: '4px 10px', fontWeight: '700', letterSpacing: '1px', fontSize: '0.75rem' },
-  versionText: { color: '#999', fontWeight: '500', letterSpacing: '0.5px' },
-  mainTitle: { fontSize: '4.5rem', lineHeight: '1.2', fontWeight: '500', margin: '0 0 40px 0', letterSpacing: '-2px', color: '#000' },
-  gradientText: { background: 'linear-gradient(90deg, #000 0%, #444 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', display: 'inline-block' },
-  heroDesc: { fontSize: '1.05rem', lineHeight: '1.8', color: '#666', maxWidth: '640px', marginBottom: '50px', fontWeight: '400', textAlign: 'justify' },
-  heroDescP: { marginBottom: '1.5rem' },
-  highlightBold: { color: '#000', fontWeight: '700' },
-  highlightOrange: { color: '#FF4500', fontWeight: '700', fontFamily: mono },
-  highlightCode: { background: 'rgba(0,0,0,0.05)', padding: '2px 6px', borderRadius: '2px', fontFamily: mono, fontSize: '0.9em', color: '#000', fontWeight: '600' },
-  sloganText: { fontSize: '1.2rem', fontWeight: '520', color: '#000', letterSpacing: '1px', borderLeft: '3px solid #FF4500', paddingLeft: '15px', marginTop: '20px' },
-  blinkingCursor: { color: '#FF4500', fontWeight: '700' },
-  decorationSquare: { width: '16px', height: '16px', background: '#FF4500' },
-  heroRight: { flex: '0.8', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-end' },
-  logoContainer: { width: '100%', display: 'flex', justifyContent: 'flex-end', paddingRight: '40px' },
-  heroLogo: { maxWidth: '500px', width: '100%' },
-  scrollDownBtn: { width: '40px', height: '40px', border: '1px solid #E5E5E5', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#FF4500', fontSize: '1.2rem' },
-  dashboardSection: { display: 'flex', gap: '60px', borderTop: '1px solid #E5E5E5', paddingTop: '60px', alignItems: 'flex-start' },
-  leftPanel: { flex: '0.8', display: 'flex', flexDirection: 'column' },
-  panelHeader: { fontFamily: mono, fontSize: '0.8rem', color: '#999', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' },
-  statusDot: { color: '#FF4500', fontSize: '0.8rem' },
-  sectionTitle: { fontSize: '2rem', fontWeight: '520', margin: '0 0 15px 0' },
-  sectionDesc: { color: '#666', marginBottom: '25px', lineHeight: '1.6' },
-  metricsRow: { display: 'flex', gap: '20px', marginBottom: '15px' },
-  metricCard: { border: '1px solid #E5E5E5', padding: '20px 30px', minWidth: '150px' },
-  metricValue: { fontFamily: mono, fontSize: '1.8rem', fontWeight: '520', marginBottom: '5px' },
-  metricLabel: { fontSize: '0.85rem', color: '#999' },
-  stepsContainer: { border: '1px solid #E5E5E5', padding: '30px', position: 'relative' },
-  stepsHeader: { fontFamily: mono, fontSize: '0.8rem', color: '#999', marginBottom: '25px', display: 'flex', alignItems: 'center', gap: '8px' },
-  diamondIcon: { fontSize: '1.2rem', lineHeight: '1' },
-  workflowList: { display: 'flex', flexDirection: 'column', gap: '20px' },
-  workflowItem: { display: 'flex', alignItems: 'flex-start', gap: '20px' },
-  stepNum: { fontFamily: mono, fontWeight: '700', color: '#000', opacity: '0.3' },
-  stepInfo: { flex: '1' },
-  stepTitle: { fontWeight: '520', fontSize: '1rem', marginBottom: '4px' },
-  stepDesc: { fontSize: '0.85rem', color: '#666' },
-  rightPanel: { flex: '1.2', display: 'flex', flexDirection: 'column' },
-  consoleBox: { border: '1px solid #CCC', padding: '8px' },
-  consoleSection: { padding: '20px' },
-  consoleHeader: { display: 'flex', justifyContent: 'space-between', marginBottom: '15px', fontFamily: mono, fontSize: '0.75rem', color: '#666' },
-  uploadZone: { border: '1px dashed #CCC', height: '200px', overflowY: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: '#FAFAFA' },
-  uploadPlaceholder: { textAlign: 'center' },
-  uploadIcon: { width: '40px', height: '40px', border: '1px solid #DDD', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 15px', color: '#999' },
-  uploadTitle: { fontWeight: '500', fontSize: '0.9rem', marginBottom: '5px' },
-  uploadHint: { fontFamily: mono, fontSize: '0.75rem', color: '#999' },
-  fileList: { width: '100%', padding: '15px', display: 'flex', flexDirection: 'column', gap: '10px' },
-  fileItem: { display: 'flex', alignItems: 'center', background: '#fff', padding: '8px 12px', border: '1px solid #EEE', fontFamily: mono, fontSize: '0.85rem' },
-  fileName: { flex: '1', margin: '0 10px' },
-  removeBtn: { background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', color: '#999' },
-  consoleDivider: { display: 'flex', alignItems: 'center', margin: '10px 0', borderTop: '1px solid #EEE' },
-  consoleDividerText: { padding: '0 15px', fontFamily: mono, fontSize: '0.7rem', color: '#BBB', letterSpacing: '1px' },
-  inputWrapper: { position: 'relative', border: '1px solid #DDD', background: '#FAFAFA' },
-  codeInput: { width: '100%', border: 'none', background: 'transparent', padding: '20px', fontFamily: mono, fontSize: '0.9rem', lineHeight: '1.6', resize: 'vertical', outline: 'none', minHeight: '150px' },
-  modelBadge: { position: 'absolute', bottom: '10px', right: '15px', fontFamily: mono, fontSize: '0.7rem', color: '#AAA' },
-  btnSection: { padding: '0 20px 20px' },
-  startEngineBtn: { width: '100%', background: '#000', color: '#fff', border: 'none', padding: '20px', fontFamily: mono, fontWeight: '700', fontSize: '1.1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', letterSpacing: '1px' },
-})
 
 const steps = [
   { num: '01', title: 'Graph Build', desc: 'Extract reality seeds from your document, build knowledge graph with Neo4j + GraphRAG' },
@@ -233,7 +165,6 @@ const router = useRouter()
 const formData = ref({ simulationRequirement: '' })
 const files = ref([])
 const loading = ref(false)
-const error = ref('')
 const isDragOver = ref(false)
 const fileInput = ref(null)
 
@@ -243,8 +174,8 @@ const canSubmit = computed(() => {
 
 const triggerFileInput = () => { if (!loading.value) fileInput.value?.click() }
 const handleFileSelect = (event) => { addFiles(Array.from(event.target.files)) }
-const handleDragOver = (e) => { isDragOver.value = true }
-const handleDragLeave = (e) => { isDragOver.value = false }
+const handleDragOver = () => { isDragOver.value = true }
+const handleDragLeave = () => { isDragOver.value = false }
 const handleDrop = (e) => { isDragOver.value = false; addFiles(Array.from(e.dataTransfer.files)) }
 
 const addFiles = (newFiles) => {
@@ -266,4 +197,53 @@ const startSimulation = () => {
 }
 </script>
 
-<!-- Styles loaded from Home.css via import -->
+<style scoped>
+/* Only what utilities cannot express: animations, gradient text clipping,
+   and the multi-state engine button. Everything else is Tailwind classes. */
+.gradient-text {
+  background: linear-gradient(90deg, #000 0%, #444 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+.blinking-cursor {
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.start-engine-btn:not(:disabled) {
+  background: #000;
+  border: 1px solid #000;
+  cursor: pointer;
+  animation: pulse-border 2s infinite;
+  transition: all 0.2s;
+}
+
+.start-engine-btn:hover:not(:disabled) {
+  background: #FF4500;
+  border-color: #FF4500;
+  transform: translateY(-2px);
+}
+
+.start-engine-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.start-engine-btn:disabled {
+  background: #E5E5E5;
+  color: #999;
+  cursor: not-allowed;
+  border: 1px solid #E5E5E5;
+}
+
+@keyframes pulse-border {
+  0% { box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.2); }
+  70% { box-shadow: 0 0 0 6px rgba(0, 0, 0, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 0, 0, 0); }
+}
+</style>

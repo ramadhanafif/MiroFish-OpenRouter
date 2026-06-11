@@ -1,41 +1,41 @@
 <template>
-  <div class="settings-container">
+  <div class="min-h-screen bg-white font-sans text-black">
     <!-- Top Navigation Bar -->
-    <nav :style="s.navbar">
-      <div :style="s.navBrand">MIROFISH OFFLINE</div>
-      <div :style="s.navLinks">
-        <router-link to="/" :style="s.navLink">&larr; Back to Home</router-link>
+    <nav class="flex h-[60px] items-center justify-between bg-black px-10 text-white max-md:px-5">
+      <div class="font-mono text-[1.2rem] font-extrabold tracking-[1px]">MIROFISH OFFLINE</div>
+      <div class="flex items-center gap-6">
+        <router-link to="/" class="font-mono text-[0.9rem] font-medium text-white no-underline hover:opacity-80">&larr; Back to Home</router-link>
       </div>
     </nav>
 
-    <div :style="s.mainContent">
-      <div :style="s.tagRow">
-        <span :style="s.orangeTag">Configuration</span>
-        <span :style="s.versionText">/ stored in .env at the project root</span>
+    <div class="mx-auto max-w-[900px] px-10 py-[60px] max-md:px-5 max-md:py-8">
+      <div class="mb-6 flex items-center gap-[15px] font-mono text-[0.8rem]">
+        <span class="bg-accent px-2.5 py-1 text-[0.75rem] font-bold tracking-[1px] text-white">Configuration</span>
+        <span class="font-medium tracking-[0.5px] text-[#999]">/ stored in .env at the project root</span>
       </div>
-      <h1 :style="s.pageTitle">Settings</h1>
-      <p :style="s.pageDesc">
+      <h1 class="m-0 mb-5 text-[3rem] font-medium leading-[1.2] tracking-[-1px] text-black max-md:text-[2rem]">Settings</h1>
+      <p class="mb-10 max-w-[700px] text-base leading-[1.7] text-[#666]">
         These values are written to the .env file the backend loads at startup.
         Secret fields show a masked preview as the placeholder: leave them blank to keep the current value, or type a new one to replace it.
       </p>
 
-      <div v-if="restartKeys.length" :style="s.restartBanner">
+      <div v-if="restartKeys.length" class="mb-[30px] border border-accent bg-accent/5 px-5 py-4 font-mono text-[0.85rem] leading-[1.6] text-[#C73800]">
         Backend restart required for the following keys to take effect: {{ restartKeys.join(', ') }}
       </div>
 
-      <div v-if="loadError" :style="s.errorBox">{{ loadError }}</div>
+      <div v-if="loadError" class="mb-[30px] border border-[#D33] bg-[#D33]/5 px-5 py-4 font-mono text-[0.85rem] text-[#B22]">{{ loadError }}</div>
 
-      <div v-for="group in groups" :key="group.id" :style="s.groupBox">
-        <div :style="s.groupHeader">
-          <span :style="s.diamondIcon">&#9671;</span> {{ group.label }}
+      <div v-for="group in groups" :key="group.id" class="mb-[30px] border border-[#E5E5E5] p-[30px] max-md:p-5">
+        <div class="mb-2 flex items-center gap-2 font-mono text-[0.95rem] font-bold tracking-[0.5px] text-black">
+          <span class="text-[1.1rem] leading-none text-accent">&#9671;</span> {{ group.label }}
         </div>
-        <p v-if="group.description" :style="s.groupDesc">{{ group.description }}</p>
+        <p v-if="group.description" class="m-0 mb-6 text-[0.85rem] leading-[1.6] text-[#999]">{{ group.description }}</p>
 
-        <div v-for="item in group.keys" :key="item.key" :style="s.fieldRow">
-          <label :style="s.fieldLabel" :for="item.key">
+        <div v-for="item in group.keys" :key="item.key" class="mb-[22px]">
+          <label class="mb-2 flex items-center gap-2.5 text-[0.95rem] font-[520] text-black max-md:flex-wrap" :for="item.key">
             <span>{{ item.label }}</span>
-            <span :style="s.fieldKey">{{ item.key }}</span>
-            <span v-if="item.restart_required" :style="s.restartTag">restart required</span>
+            <span class="font-mono text-[0.7rem] tracking-[0.5px] text-[#BBB]">{{ item.key }}</span>
+            <span v-if="item.restart_required" class="border border-accent px-1.5 py-px font-mono text-[0.65rem] tracking-[0.5px] text-accent">restart required</span>
           </label>
           <input
             v-if="item.secret"
@@ -44,25 +44,29 @@
             type="password"
             autocomplete="new-password"
             :placeholder="item.set ? item.value : 'not set'"
-            :style="s.input"
+            class="box-border w-full border border-[#DDD] bg-[#FAFAFA] px-4 py-3 font-mono text-[0.9rem] text-black outline-none focus:border-accent"
           />
           <input
             v-else
             :id="item.key"
             v-model="form[item.key]"
             type="text"
-            :style="s.input"
+            class="box-border w-full border border-[#DDD] bg-[#FAFAFA] px-4 py-3 font-mono text-[0.9rem] text-black outline-none focus:border-accent"
           />
-          <div v-if="item.description" :style="s.fieldDesc">{{ item.description }}</div>
+          <div v-if="item.description" class="mt-1.5 text-[0.8rem] leading-[1.5] text-[#999]">{{ item.description }}</div>
         </div>
       </div>
 
-      <div v-if="groups.length" :style="s.saveRow">
-        <button :style="s.saveBtn" :disabled="saving" @click="save">
+      <div v-if="groups.length" class="mt-2.5 flex items-center gap-6 max-md:flex-col max-md:items-stretch">
+        <button
+          class="flex cursor-pointer items-center justify-between gap-4 border-none bg-black px-[30px] py-4 font-mono text-base font-bold tracking-[1px] text-white transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-60"
+          :disabled="saving"
+          @click="save"
+        >
           <span>{{ saving ? 'Saving...' : 'Save Changes' }}</span>
           <span>&rarr;</span>
         </button>
-        <div v-if="status" :style="statusOk ? s.statusOk : s.statusError">{{ status }}</div>
+        <div v-if="status" class="font-mono text-[0.85rem]" :class="statusOk ? 'text-[#1A7F37]' : 'text-[#B22]'">{{ status }}</div>
       </div>
     </div>
   </div>
@@ -71,37 +75,6 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import service from '../api/index.js'
-
-const mono = 'JetBrains Mono, monospace'
-
-const s = reactive({
-  navbar: { height: '60px', background: '#000', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 40px' },
-  navBrand: { fontFamily: mono, fontWeight: '800', letterSpacing: '1px', fontSize: '1.2rem' },
-  navLinks: { display: 'flex', alignItems: 'center', gap: '24px' },
-  navLink: { color: '#fff', textDecoration: 'none', fontFamily: mono, fontSize: '0.9rem', fontWeight: '500' },
-  mainContent: { maxWidth: '900px', margin: '0 auto', padding: '60px 40px' },
-  tagRow: { display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '25px', fontFamily: mono, fontSize: '0.8rem' },
-  orangeTag: { background: '#FF4500', color: '#fff', padding: '4px 10px', fontWeight: '700', letterSpacing: '1px', fontSize: '0.75rem' },
-  versionText: { color: '#999', fontWeight: '500', letterSpacing: '0.5px' },
-  pageTitle: { fontSize: '3rem', lineHeight: '1.2', fontWeight: '500', margin: '0 0 20px 0', letterSpacing: '-1px', color: '#000' },
-  pageDesc: { fontSize: '1rem', lineHeight: '1.7', color: '#666', marginBottom: '40px', maxWidth: '700px' },
-  restartBanner: { border: '1px solid #FF4500', background: 'rgba(255,69,0,0.06)', color: '#C73800', padding: '15px 20px', fontFamily: mono, fontSize: '0.85rem', marginBottom: '30px', lineHeight: '1.6' },
-  errorBox: { border: '1px solid #D33', background: 'rgba(221,51,51,0.06)', color: '#B22', padding: '15px 20px', fontFamily: mono, fontSize: '0.85rem', marginBottom: '30px' },
-  groupBox: { border: '1px solid #E5E5E5', padding: '30px', marginBottom: '30px' },
-  groupHeader: { fontFamily: mono, fontSize: '0.95rem', fontWeight: '700', color: '#000', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', letterSpacing: '0.5px' },
-  diamondIcon: { color: '#FF4500', fontSize: '1.1rem', lineHeight: '1' },
-  groupDesc: { fontSize: '0.85rem', color: '#999', margin: '0 0 25px 0', lineHeight: '1.6' },
-  fieldRow: { marginBottom: '22px' },
-  fieldLabel: { display: 'flex', alignItems: 'center', gap: '10px', fontWeight: '520', fontSize: '0.95rem', marginBottom: '8px', color: '#000' },
-  fieldKey: { fontFamily: mono, fontSize: '0.7rem', color: '#BBB', letterSpacing: '0.5px' },
-  restartTag: { fontFamily: mono, fontSize: '0.65rem', color: '#FF4500', border: '1px solid #FF4500', padding: '1px 6px', letterSpacing: '0.5px' },
-  input: { width: '100%', border: '1px solid #DDD', background: '#FAFAFA', padding: '12px 15px', fontFamily: mono, fontSize: '0.9rem', outline: 'none', boxSizing: 'border-box', color: '#000' },
-  fieldDesc: { fontSize: '0.8rem', color: '#999', marginTop: '6px', lineHeight: '1.5' },
-  saveRow: { display: 'flex', alignItems: 'center', gap: '25px', marginTop: '10px' },
-  saveBtn: { background: '#000', color: '#fff', border: 'none', padding: '16px 30px', fontFamily: mono, fontWeight: '700', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '15px', cursor: 'pointer', letterSpacing: '1px' },
-  statusOk: { fontFamily: mono, fontSize: '0.85rem', color: '#1A7F37' },
-  statusError: { fontFamily: mono, fontSize: '0.85rem', color: '#B22' },
-})
 
 const groups = ref([])
 const form = reactive({})

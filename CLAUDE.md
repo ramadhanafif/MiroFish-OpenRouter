@@ -50,5 +50,6 @@ Three layers, dependency-injected top to bottom:
 
 ## Conventions
 
+- New frontend UI is styled with Tailwind v4 utilities (`frontend/src/tailwind.css`; preflight is intentionally not imported). Existing scoped CSS in the Step components stays as is; convert opportunistically, never wholesale.
 - All user-facing strings and LLM outputs must be English. The original project was Chinese; a regression here is a bug (the report agent was specifically fixed to force English-only output). Code comments in older files may still be Chinese; don't add new ones. Avoid em dashes in all writing (the project owner explicitly dislikes them).
 - Python backend uses `uv` (lockfile `uv.lock`, deps in `pyproject.toml`); keep `requirements.txt` in sync since the README's manual path and Docker use it.
