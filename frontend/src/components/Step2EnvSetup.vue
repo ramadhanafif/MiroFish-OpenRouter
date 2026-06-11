@@ -516,14 +516,17 @@
             >
               ← Back to Graph Build
             </button>
-            <button 
+            <button
               class="action-btn primary"
               :disabled="phase < 4"
               @click="handleStartSimulation"
             >
-              Start dual world parallel simulation ➝
+              {{ autoAdvanceIn !== null ? 'Start dual world parallel simulation (' + autoAdvanceIn + 's) ➝' : 'Start dual world parallel simulation ➝' }}
             </button>
           </div>
+          <p v-if="autoAdvanceIn !== null" class="auto-advance-hint" @click="cancelAutoAdvance">
+            Starting automatically in {{ autoAdvanceIn }}s. Click here to stay on this step.
+          </p>
         </div>
       </div>
     </div>
@@ -633,7 +636,8 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
-import { 
+import { useAutoAdvance } from '../composables/useAutoAdvance'
+import {
   prepareSimulation, 
   getPrepareStatus, 
   getSimulationProfilesRealtime,
@@ -739,9 +743,10 @@ const addLog = (msg) => {
 
 // ProcessStart simulationButton click
 const handleStartSimulation = () => {
+  cancelAutoAdvance()
   // Build parameters to pass to parent component
   const params = {}
-  
+
   if (useCustomRounds.value) {
     // User custom rounds，Pass max_rounds Parameter
     params.maxRounds = customMaxRounds.value
@@ -753,6 +758,17 @@ const handleStartSimulation = () => {
   
   emit('next-step', params)
 }
+
+// Auto-start the simulation once a freshly generated config is ready.
+// Only the live-generation path calls startAutoAdvance(); loadPreparedData
+// (revisiting an already-prepared simulation) stays manual, because starting
+// force-wipes the previous run's data.
+const { countdown: autoAdvanceIn, start: startAutoAdvance, cancel: cancelAutoAdvance } =
+  useAutoAdvance(handleStartSimulation, 10)
+
+// Touching the rounds controls means the user wants to configure things
+watch(useCustomRounds, () => cancelAutoAdvance())
+watch(customMaxRounds, () => cancelAutoAdvance())
 
 const truncateBio = (bio) => {
   if (bio.length > 80) {
@@ -1010,6 +1026,7 @@ const fetchConfigRealtime = async () => {
         phase.value = 4
         addLog('✓ Env setup complete, ready to start the simulation')
         emit('update-status', 'completed')
+        startAutoAdvance()
       }
     }
   } catch (err) {
@@ -2598,5 +2615,17 @@ onUnmounted(() => {
 .modal-leave-to .profile-modal {
   transform: scale(0.95) translateY(10px);
   opacity: 0;
+}
+
+.auto-advance-hint {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-secondary, #888);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.auto-advance-hint:hover {
+  color: var(--text-primary, #ccc);
 }
 </style>

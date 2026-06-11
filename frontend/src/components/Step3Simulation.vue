@@ -97,9 +97,12 @@
           @click="handleNextStep"
         >
           <span v-if="isGeneratingReport" class="loading-spinner-small"></span>
-          {{ isGeneratingReport ? 'Starting...' : 'Generate Report' }}
+          {{ isGeneratingReport ? 'Starting...' : autoAdvanceIn !== null ? 'Generate Report (' + autoAdvanceIn + 's)' : 'Generate Report' }}
           <span v-if="!isGeneratingReport" class="arrow-icon">→</span>
         </button>
+        <p v-if="autoAdvanceIn !== null" class="auto-advance-hint" @click="cancelAutoAdvance">
+          Generating automatically in {{ autoAdvanceIn }}s. Click here to stay on this step.
+        </p>
       </div>
     </div>
 
@@ -288,6 +291,7 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAutoAdvance } from '../composables/useAutoAdvance'
 import { 
   startSimulation, 
   stopSimulation,
@@ -520,9 +524,13 @@ const fetchRunStatus = async () => {
           addLog('✓ Detected all platform simulations have ended')
         }
         addLog('✓ Simulation completed')
+        const wasRunning = phase.value === 1
         phase.value = 2
         stopPolling()
         emit('update-status', 'completed')
+        // Auto-generate the report only when the run finished in this
+        // session, so opening an already-completed simulation stays manual
+        if (wasRunning) startAutoAdvance()
       }
     }
   } catch (err) {
@@ -639,6 +647,7 @@ const formatActionTime = (timestamp) => {
 }
 
 const handleNextStep = async () => {
+  cancelAutoAdvance()
   if (!props.simulationId) {
     addLog('Error: Missing simulationId')
     return
@@ -673,6 +682,10 @@ const handleNextStep = async () => {
     isGeneratingReport.value = false
   }
 }
+
+// Auto-advance to report generation when the simulation finishes
+const { countdown: autoAdvanceIn, start: startAutoAdvance, cancel: cancelAutoAdvance } =
+  useAutoAdvance(handleNextStep, 10)
 
 // Scroll log to bottom
 const logContent = ref(null)
@@ -1260,5 +1273,17 @@ onUnmounted(() => {
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   margin-right: 6px;
+}
+
+.auto-advance-hint {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-secondary, #888);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.auto-advance-hint:hover {
+  color: var(--text-primary, #ccc);
 }
 </style>

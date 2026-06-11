@@ -164,8 +164,11 @@
             @click="handleEnterEnvSetup"
           >
             <span v-if="creatingSimulation" class="spinner-sm"></span>
-            {{ creatingSimulation ? 'Creating...' : 'Enter Environment Setup ➝' }}
+            {{ creatingSimulation ? 'Creating...' : autoAdvanceIn !== null ? 'Enter Environment Setup (' + autoAdvanceIn + 's) ➝' : 'Enter Environment Setup ➝' }}
           </button>
+          <p v-if="autoAdvanceIn !== null" class="auto-advance-hint" @click="cancelAutoAdvance">
+            Continuing automatically in {{ autoAdvanceIn }}s. Click here to stay on this step.
+          </p>
         </div>
       </div>
     </div>
@@ -190,6 +193,7 @@
 import { computed, ref, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { createSimulation } from '../api/simulation'
+import { useAutoAdvance } from '../composables/useAutoAdvance'
 
 const router = useRouter()
 
@@ -210,11 +214,12 @@ const creatingSimulation = ref(false)
 
 // Enter environment setup - create simulation and navigate
 const handleEnterEnvSetup = async () => {
+  cancelAutoAdvance()
   if (!props.projectData?.project_id || !props.projectData?.graph_id) {
     console.error('Missing project or graph information')
     return
   }
-  
+
   creatingSimulation.value = true
   
   try {
@@ -242,6 +247,15 @@ const handleEnterEnvSetup = async () => {
     creatingSimulation.value = false
   }
 }
+
+// Auto-advance to env setup when the build finishes in this session
+// (phase 1 -> 2 only, so revisiting an already-built project stays put)
+const { countdown: autoAdvanceIn, start: startAutoAdvance, cancel: cancelAutoAdvance } =
+  useAutoAdvance(handleEnterEnvSetup, 10)
+
+watch(() => props.currentPhase, (newPhase, oldPhase) => {
+  if (newPhase >= 2 && oldPhase === 1) startAutoAdvance()
+})
 
 const selectOntologyItem = (item, type) => {
   selectedOntologyItem.value = { ...item, itemType: type }
@@ -694,5 +708,17 @@ watch(() => props.systemLogs.length, () => {
 .log-msg {
   color: #CCC;
   word-break: break-all;
+}
+
+.auto-advance-hint {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-secondary, #888);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.auto-advance-hint:hover {
+  color: var(--text-primary, #ccc);
 }
 </style>
