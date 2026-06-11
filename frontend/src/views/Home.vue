@@ -96,7 +96,7 @@
                 <span>Supported: PDF, MD, TXT</span>
               </div>
               <div
-                class="flex h-[200px] cursor-pointer items-center justify-center overflow-y-auto border border-dashed bg-[#FAFAFA] hover:border-[#999] hover:bg-[#F0F0F0]"
+                class="flex h-[200px] cursor-pointer items-center justify-center overflow-y-auto border border-dashed bg-[#FAFAFA] transition-all duration-300 hover:border-[#999] hover:bg-[#F0F0F0]"
                 :class="isDragOver ? 'border-accent bg-[#F0F0F0]' : 'border-[#CCC]'"
                 @dragover.prevent="handleDragOver"
                 @dragleave.prevent="handleDragLeave"
