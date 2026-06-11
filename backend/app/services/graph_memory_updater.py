@@ -4,18 +4,15 @@ Graph memory update service that processes agent activities and updates them to 
 Replaces zep_graph_memory_updater.py; Zep client replaced by GraphStorage.
 """
 
-import os
-import time
 import threading
-import json
-from typing import Dict, Any, List, Optional, Callable
+import time
 from dataclasses import dataclass
 from datetime import datetime
-from queue import Queue, Empty
+from queue import Empty, Queue
+from typing import Any
 
-from ..config import Config
-from ..utils.logger import get_logger
 from ..storage import GraphStorage
+from ..utils.logger import get_logger
 
 logger = get_logger('mirofish.graph_memory_updater')
 
@@ -27,7 +24,7 @@ class AgentActivity:
     agent_id: int
     agent_name: str
     action_type: str        # CREATE_POST, LIKE_POST, etc.
-    action_args: Dict[str, Any]
+    action_args: dict[str, Any]
     round_num: int
     timestamp: str
 
@@ -205,14 +202,14 @@ class GraphMemoryUpdater:
 
         self._activity_queue: Queue = Queue()
 
-        self._platform_buffers: Dict[str, List[AgentActivity]] = {
+        self._platform_buffers: dict[str, list[AgentActivity]] = {
             'twitter': [],
             'reddit': [],
         }
         self._buffer_lock = threading.Lock()
 
         self._running = False
-        self._worker_thread: Optional[threading.Thread] = None
+        self._worker_thread: threading.Thread | None = None
 
         self._total_activities = 0
         self._total_sent = 0
@@ -265,7 +262,7 @@ class GraphMemoryUpdater:
         self._total_activities += 1
         logger.debug(f"Add activity to queue: {activity.agent_name} - {activity.action_type}")
 
-    def add_activity_from_dict(self, data: Dict[str, Any], platform: str):
+    def add_activity_from_dict(self, data: dict[str, Any], platform: str):
         """Add activity from dict data"""
         if "event_type" in data:
             return
@@ -308,7 +305,7 @@ class GraphMemoryUpdater:
                 logger.error(f"Worker loop exception: {e}")
                 time.sleep(1)
 
-    def _send_batch_activities(self, activities: List[AgentActivity], platform: str):
+    def _send_batch_activities(self, activities: list[AgentActivity], platform: str):
         """
         Send batched activities to the graph by merging them as text and using add_text to trigger NER.
         """
@@ -359,7 +356,7 @@ class GraphMemoryUpdater:
             for platform in self._platform_buffers:
                 self._platform_buffers[platform] = []
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get statistics"""
         with self._buffer_lock:
             buffer_sizes = {p: len(b) for p, b in self._platform_buffers.items()}
@@ -386,7 +383,7 @@ class GraphMemoryManager:
     NOTE: create_updater() requires a GraphStorage instance; it must be passed in.
     """
 
-    _updaters: Dict[str, GraphMemoryUpdater] = {}
+    _updaters: dict[str, GraphMemoryUpdater] = {}
     _lock = threading.Lock()
 
     @classmethod
@@ -413,7 +410,7 @@ class GraphMemoryManager:
             return updater
 
     @classmethod
-    def get_updater(cls, simulation_id: str) -> Optional[GraphMemoryUpdater]:
+    def get_updater(cls, simulation_id: str) -> GraphMemoryUpdater | None:
         """Get updater for simulation"""
         return cls._updaters.get(simulation_id)
 
@@ -446,7 +443,7 @@ class GraphMemoryManager:
             logger.info("Stopped all graph memory updaters")
 
     @classmethod
-    def get_all_stats(cls) -> Dict[str, Dict[str, Any]]:
+    def get_all_stats(cls) -> dict[str, dict[str, Any]]:
         """Get statistics for all updaters"""
         return {
             sim_id: updater.get_stats()

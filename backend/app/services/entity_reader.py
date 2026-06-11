@@ -5,11 +5,11 @@ Reads nodes from Neo4j graph, filters out meaningful entity type nodes.
 Replaces zep_entity_reader.py; all Zep Cloud calls replaced by GraphStorage.
 """
 
-from typing import Dict, Any, List, Optional, Set
 from dataclasses import dataclass, field
+from typing import Any
 
-from ..utils.logger import get_logger
 from ..storage import GraphStorage
+from ..utils.logger import get_logger
 
 logger = get_logger('mirofish.entity_reader')
 
@@ -19,15 +19,15 @@ class EntityNode:
     """Entity node data structure"""
     uuid: str
     name: str
-    labels: List[str]
+    labels: list[str]
     summary: str
-    attributes: Dict[str, Any]
+    attributes: dict[str, Any]
     # Related edges
-    related_edges: List[Dict[str, Any]] = field(default_factory=list)
+    related_edges: list[dict[str, Any]] = field(default_factory=list)
     # Related other nodes
-    related_nodes: List[Dict[str, Any]] = field(default_factory=list)
+    related_nodes: list[dict[str, Any]] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "uuid": self.uuid,
             "name": self.name,
@@ -38,7 +38,7 @@ class EntityNode:
             "related_nodes": self.related_nodes,
         }
 
-    def get_entity_type(self) -> Optional[str]:
+    def get_entity_type(self) -> str | None:
         """Get entity type (exclude default Entity label)"""
         for label in self.labels:
             if label not in ["Entity", "Node"]:
@@ -49,12 +49,12 @@ class EntityNode:
 @dataclass
 class FilteredEntities:
     """Filtered entity set"""
-    entities: List[EntityNode]
-    entity_types: Set[str]
+    entities: list[EntityNode]
+    entity_types: set[str]
     total_count: int
     filtered_count: int
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "entities": [e.to_dict() for e in self.entities],
             "entity_types": list(self.entity_types),
@@ -76,7 +76,7 @@ class EntityReader:
     def __init__(self, storage: GraphStorage):
         self.storage = storage
 
-    def get_all_nodes(self, graph_id: str) -> List[Dict[str, Any]]:
+    def get_all_nodes(self, graph_id: str) -> list[dict[str, Any]]:
         """
         Get all nodes from the graph.
 
@@ -91,7 +91,7 @@ class EntityReader:
         logger.info(f"Got {len(nodes)} nodes total")
         return nodes
 
-    def get_all_edges(self, graph_id: str) -> List[Dict[str, Any]]:
+    def get_all_edges(self, graph_id: str) -> list[dict[str, Any]]:
         """
         Get all edges from the graph.
 
@@ -106,7 +106,7 @@ class EntityReader:
         logger.info(f"Got {len(edges)} edges total")
         return edges
 
-    def get_node_edges(self, node_uuid: str) -> List[Dict[str, Any]]:
+    def get_node_edges(self, node_uuid: str) -> list[dict[str, Any]]:
         """
         Get all related edges for a specified node.
 
@@ -125,7 +125,7 @@ class EntityReader:
     def filter_defined_entities(
         self,
         graph_id: str,
-        defined_entity_types: Optional[List[str]] = None,
+        defined_entity_types: list[str] | None = None,
         enrich_with_edges: bool = True
     ) -> FilteredEntities:
         """
@@ -157,7 +157,7 @@ class EntityReader:
 
         # Filter entities matching criteria
         filtered_entities = []
-        entity_types_found: Set[str] = set()
+        entity_types_found: set[str] = set()
 
         for node in all_nodes:
             labels = node.get("labels", [])
@@ -192,7 +192,7 @@ class EntityReader:
             # Get related edges and nodes
             if enrich_with_edges:
                 related_edges = []
-                related_node_uuids: Set[str] = set()
+                related_node_uuids: set[str] = set()
 
                 for edge in all_edges:
                     if edge["source_node_uuid"] == node["uuid"]:
@@ -244,7 +244,7 @@ class EntityReader:
         self,
         graph_id: str,
         entity_uuid: str
-    ) -> Optional[EntityNode]:
+    ) -> EntityNode | None:
         """
         Get a single entity with its complete context (edges and related nodes).
 
@@ -269,7 +269,7 @@ class EntityReader:
 
             # Process related edges and collect related node UUIDs
             related_edges = []
-            related_node_uuids: Set[str] = set()
+            related_node_uuids: set[str] = set()
 
             for edge in edges:
                 if edge["source_node_uuid"] == entity_uuid:
@@ -320,7 +320,7 @@ class EntityReader:
         graph_id: str,
         entity_type: str,
         enrich_with_edges: bool = True
-    ) -> List[EntityNode]:
+    ) -> list[EntityNode]:
         """
         Get all entities of a specified type.
 

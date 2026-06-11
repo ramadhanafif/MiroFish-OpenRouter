@@ -3,10 +3,12 @@ API Call Retry Mechanism
 Handles retry logic for external API calls like LLM
 """
 
-import time
-import random
 import functools
-from typing import Callable, Any, Optional, Type, Tuple
+import random
+import time
+from collections.abc import Callable
+from typing import Any
+
 from ..utils.logger import get_logger
 
 logger = get_logger('mirofish.retry')
@@ -18,8 +20,8 @@ def retry_with_backoff(
     max_delay: float = 30.0,
     backoff_factor: float = 2.0,
     jitter: bool = True,
-    exceptions: Tuple[Type[Exception], ...] = (Exception,),
-    on_retry: Optional[Callable[[Exception, int], None]] = None
+    exceptions: tuple[type[Exception], ...] = (Exception,),
+    on_retry: Callable[[Exception, int], None] | None = None
 ):
     """
     Retry decorator with exponential backoff
@@ -71,7 +73,7 @@ def retry_with_backoff(
                     time.sleep(current_delay)
                     delay *= backoff_factor
 
-            raise last_exception
+            raise last_exception if last_exception is not None else RuntimeError('retry loop exited without capturing an exception')
 
         return wrapper
     return decorator
@@ -83,14 +85,14 @@ def retry_with_backoff_async(
     max_delay: float = 30.0,
     backoff_factor: float = 2.0,
     jitter: bool = True,
-    exceptions: Tuple[Type[Exception], ...] = (Exception,),
-    on_retry: Optional[Callable[[Exception, int], None]] = None
+    exceptions: tuple[type[Exception], ...] = (Exception,),
+    on_retry: Callable[[Exception, int], None] | None = None
 ):
     """
     Async version of retry decorator
     """
     import asyncio
-    
+
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         async def wrapper(*args, **kwargs) -> Any:
@@ -123,7 +125,7 @@ def retry_with_backoff_async(
                     await asyncio.sleep(current_delay)
                     delay *= backoff_factor
 
-            raise last_exception
+            raise last_exception if last_exception is not None else RuntimeError('retry loop exited without capturing an exception')
 
         return wrapper
     return decorator
@@ -150,7 +152,7 @@ class RetryableAPIClient:
         self,
         func: Callable,
         *args,
-        exceptions: Tuple[Type[Exception], ...] = (Exception,),
+        exceptions: tuple[type[Exception], ...] = (Exception,),
         **kwargs
     ) -> Any:
         """
@@ -190,15 +192,15 @@ class RetryableAPIClient:
                 time.sleep(current_delay)
                 delay *= self.backoff_factor
 
-        raise last_exception
+        raise last_exception if last_exception is not None else RuntimeError('retry loop exited without capturing an exception')
 
     def call_batch_with_retry(
         self,
         items: list,
         process_func: Callable,
-        exceptions: Tuple[Type[Exception], ...] = (Exception,),
+        exceptions: tuple[type[Exception], ...] = (Exception,),
         continue_on_failure: bool = True
-    ) -> Tuple[list, list]:
+    ) -> tuple[list, list]:
         """
         Batch call with individual retry for each failed item
 

@@ -3,13 +3,13 @@ Graph building service.
 Uses GraphStorage (Neo4j) to replace Zep Cloud API.
 """
 
-import time
 import logging
 import threading
-from typing import Dict, Any, List, Optional, Callable
+import time
+from collections.abc import Callable
 from dataclasses import dataclass
+from typing import Any
 
-from ..config import Config
 from ..models.task import TaskManager, TaskStatus
 from ..storage import GraphStorage
 from .text_processor import TextProcessor
@@ -23,9 +23,9 @@ class GraphInfo:
     graph_id: str
     node_count: int
     edge_count: int
-    entity_types: List[str]
+    entity_types: list[str]
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "graph_id": self.graph_id,
             "node_count": self.node_count,
@@ -47,7 +47,7 @@ class GraphBuilderService:
     def build_graph_async(
         self,
         text: str,
-        ontology: Dict[str, Any],
+        ontology: dict[str, Any],
         graph_name: str = "MiroFish Graph",
         chunk_size: int = 500,
         chunk_overlap: int = 50,
@@ -91,7 +91,7 @@ class GraphBuilderService:
         self,
         task_id: str,
         text: str,
-        ontology: Dict[str, Any],
+        ontology: dict[str, Any],
         graph_name: str,
         chunk_size: int,
         chunk_overlap: int,
@@ -172,7 +172,7 @@ class GraphBuilderService:
             description="MiroFish Social Simulation Graph"
         )
 
-    def set_ontology(self, graph_id: str, ontology: Dict[str, Any]):
+    def set_ontology(self, graph_id: str, ontology: dict[str, Any]):
         """
         SetGraphOntology
 
@@ -185,10 +185,10 @@ class GraphBuilderService:
     def add_text_batches(
         self,
         graph_id: str,
-        chunks: List[str],
+        chunks: list[str],
         batch_size: int = 3,
-        progress_callback: Optional[Callable] = None
-    ) -> List[str]:
+        progress_callback: Callable | None = None
+    ) -> list[str]:
         """Add text in batches to graph, return uuid list of all episodes"""
         episode_uuids = []
         total_chunks = len(chunks)
@@ -245,7 +245,7 @@ class GraphBuilderService:
             entity_types=info.get("entity_types", []),
         )
 
-    def get_graph_data(self, graph_id: str) -> Dict[str, Any]:
+    def get_graph_data(self, graph_id: str) -> dict[str, Any]:
         """Get complete graph data (including details)"""
         return self.storage.get_graph_data(graph_id)
 

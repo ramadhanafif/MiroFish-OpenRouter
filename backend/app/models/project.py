@@ -3,14 +3,15 @@ Project Context Management
 Persists project state on server to avoid frontend passing large data between interfaces
 """
 
-import os
 import json
-import uuid
+import os
 import shutil
+import uuid
+from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Dict, Any, List, Optional
 from enum import Enum
-from dataclasses import dataclass, field, asdict
+from typing import Any
+
 from ..config import Config
 
 
@@ -33,26 +34,26 @@ class Project:
     updated_at: str
 
     # File information
-    files: List[Dict[str, str]] = field(default_factory=list)  # [{filename, path, size}]
+    files: list[dict[str, str]] = field(default_factory=list)  # [{filename, path, size}]
     total_text_length: int = 0
 
     # Ontology information (populated after interface 1 generates)
-    ontology: Optional[Dict[str, Any]] = None
-    analysis_summary: Optional[str] = None
+    ontology: dict[str, Any] | None = None
+    analysis_summary: str | None = None
 
     # Graph information (populated after interface 2 completes)
-    graph_id: Optional[str] = None
-    graph_build_task_id: Optional[str] = None
+    graph_id: str | None = None
+    graph_build_task_id: str | None = None
 
     # Configuration
-    simulation_requirement: Optional[str] = None
+    simulation_requirement: str | None = None
     chunk_size: int = 500
     chunk_overlap: int = 50
 
     # Error information
-    error: Optional[str] = None
+    error: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary"""
         return {
             "project_id": self.project_id,
@@ -71,14 +72,14 @@ class Project:
             "chunk_overlap": self.chunk_overlap,
             "error": self.error
         }
-    
+
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'Project':
+    def from_dict(cls, data: dict[str, Any]) -> 'Project':
         """Create from dictionary"""
         status = data.get('status', 'created')
         if isinstance(status, str):
             status = ProjectStatus(status)
-        
+
         return cls(
             project_id=data['project_id'],
             name=data.get('name', 'Unnamed Project'),
@@ -174,7 +175,7 @@ class ProjectManager:
             json.dump(project.to_dict(), f, ensure_ascii=False, indent=2)
 
     @classmethod
-    def get_project(cls, project_id: str) -> Optional[Project]:
+    def get_project(cls, project_id: str) -> Project | None:
         """
         Get project
 
@@ -189,13 +190,13 @@ class ProjectManager:
         if not os.path.exists(meta_path):
             return None
 
-        with open(meta_path, 'r', encoding='utf-8') as f:
+        with open(meta_path, encoding='utf-8') as f:
             data = json.load(f)
 
         return Project.from_dict(data)
 
     @classmethod
-    def list_projects(cls, limit: int = 50) -> List[Project]:
+    def list_projects(cls, limit: int = 50) -> list[Project]:
         """
         List all projects
 
@@ -238,7 +239,7 @@ class ProjectManager:
         return True
 
     @classmethod
-    def save_file_to_project(cls, project_id: str, file_storage, original_filename: str) -> Dict[str, str]:
+    def save_file_to_project(cls, project_id: str, file_storage, original_filename: str) -> dict[str, str]:
         """
         Save uploaded file to project directory
 
@@ -279,18 +280,18 @@ class ProjectManager:
             f.write(text)
 
     @classmethod
-    def get_extracted_text(cls, project_id: str) -> Optional[str]:
+    def get_extracted_text(cls, project_id: str) -> str | None:
         """Get extracted text"""
         text_path = cls._get_project_text_path(project_id)
 
         if not os.path.exists(text_path):
             return None
 
-        with open(text_path, 'r', encoding='utf-8') as f:
+        with open(text_path, encoding='utf-8') as f:
             return f.read()
 
     @classmethod
-    def get_project_files(cls, project_id: str) -> List[str]:
+    def get_project_files(cls, project_id: str) -> list[str]:
         """Get all project file paths"""
         files_dir = cls._get_project_files_dir(project_id)
 

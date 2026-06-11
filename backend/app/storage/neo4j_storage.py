@@ -6,25 +6,26 @@ Includes: CRUD, NER/RE-based text ingestion, hybrid search, retry logic.
 """
 
 import json
+import logging
 import time
 import uuid
-import logging
-from datetime import datetime, timezone
-from typing import Dict, Any, List, Optional, Callable
+from collections.abc import Callable
+from datetime import UTC, datetime
+from typing import Any
 
-from neo4j import GraphDatabase, Session as Neo4jSession
+from neo4j import GraphDatabase
 from neo4j.exceptions import (
-    TransientError,
     ServiceUnavailable,
     SessionExpired,
+    TransientError,
 )
 
 from ..config import Config
-from .graph_storage import GraphStorage
+from . import neo4j_schema
 from .embedding_service import EmbeddingService
+from .graph_storage import GraphStorage
 from .ner_extractor import NERExtractor
 from .search_service import SearchService
-from . import neo4j_schema
 
 logger = logging.getLogger('mirofish.neo4j_storage')
 
@@ -37,11 +38,11 @@ class Neo4jStorage(GraphStorage):
 
     def __init__(
         self,
-        uri: Optional[str] = None,
-        user: Optional[str] = None,
-        password: Optional[str] = None,
-        embedding_service: Optional[EmbeddingService] = None,
-        ner_extractor: Optional[NERExtractor] = None,
+        uri: str | None = None,
+        user: str | None = None,
+        password: str | None = None,
+        embedding_service: EmbeddingService | None = None,
+        ner_extractor: NERExtractor | None = None,
     ):
         self._uri = uri or Config.NEO4J_URI
         self._user = user or Config.NEO4J_USER
@@ -135,7 +136,7 @@ class Neo4jStorage(GraphStorage):
 
     def create_graph(self, name: str, description: str = "") -> str:
         graph_id = str(uuid.uuid4())
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
 
         def _create(tx):
             tx.run(
@@ -177,7 +178,7 @@ class Neo4jStorage(GraphStorage):
             self._call_with_retry(session.execute_write, _delete)
         logger.info(f"Deleted graph {graph_id}")
 
-    def set_ontology(self, graph_id: str, ontology: Dict[str, Any]) -> None:
+    def set_ontology(self, graph_id: str, ontology: dict[str, Any]) -> None:
         def _set(tx):
             tx.run(
                 """
@@ -191,7 +192,7 @@ class Neo4jStorage(GraphStorage):
         with self._driver.session() as session:
             self._call_with_retry(session.execute_write, _set)
 
-    def get_ontology(self, graph_id: str) -> Dict[str, Any]:
+    def get_ontology(self, graph_id: str) -> dict[str, Any]:
         with self._driver.session() as session:
             result = session.run(
                 "MATCH (g:Graph {graph_id: $gid}) RETURN g.ontology_json AS oj",
@@ -209,7 +210,7 @@ class Neo4jStorage(GraphStorage):
     def add_text(self, graph_id: str, text: str) -> str:
         """Process text: NER/RE → batch embed → create nodes/edges → return episode_id."""
         episode_id = str(uuid.uuid4())
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
 
         # Get ontology for NER guidance
         ontology = self.get_ontology(graph_id)
@@ -240,7 +241,7 @@ class Neo4jStorage(GraphStorage):
 
         entity_embeddings = all_embeddings[:len(entities)]
         relation_embeddings = all_embeddings[len(entities):]
-        logger.info(f"[add_text] Embedding done, writing to Neo4j...")
+        logger.info("[add_text] Embedding done, writing to Neo4j...")
 
         with self._driver.session() as session:
             # Create episode node
@@ -264,7 +265,7 @@ class Neo4jStorage(GraphStorage):
             self._call_with_retry(session.execute_write, _create_episode)
 
             # MERGE entities (upsert by graph_id + name + primary label)
-            entity_uuid_map: Dict[str, str] = {}  # name_lower -> uuid
+            entity_uuid_map: dict[str, str] = {}  # name_lower -> uuid
             for idx, entity in enumerate(entities):
                 ename = entity["name"]
                 etype = entity["type"]
@@ -314,9 +315,11 @@ class Neo4jStorage(GraphStorage):
                 # Add entity type label
                 if etype and etype != "Entity":
                     try:
-                        def _add_label(tx, _name_lower=ename.lower()):
+                        name_lower = ename.lower()
+
+                        def _add_label(tx, _name_lower=name_lower, _etype=etype):
                             tx.run(
-                                f"MATCH (n:Entity {{graph_id: $gid, name_lower: $nl}}) SET n:`{etype}`",
+                                f"MATCH (n:Entity {{graph_id: $gid, name_lower: $nl}}) SET n:`{_etype}`",
                                 gid=graph_id,
                                 nl=_name_lower,
                             )
@@ -385,10 +388,10 @@ class Neo4jStorage(GraphStorage):
     def add_text_batch(
         self,
         graph_id: str,
-        chunks: List[str],
+        chunks: list[str],
         batch_size: int = 3,
-        progress_callback: Optional[Callable] = None,
-    ) -> List[str]:
+        progress_callback: Callable | None = None,
+    ) -> list[str]:
         """Batch-add text chunks with progress reporting."""
         episode_ids = []
         total = len(chunks)
@@ -409,8 +412,8 @@ class Neo4jStorage(GraphStorage):
 
     def wait_for_processing(
         self,
-        episode_ids: List[str],
-        progress_callback: Optional[Callable] = None,
+        episode_ids: list[str],
+        progress_callback: Callable | None = None,
         timeout: int = 600,
     ) -> None:
         """No-op; processing is synchronous in Neo4j."""
@@ -421,7 +424,7 @@ class Neo4jStorage(GraphStorage):
     # Read nodes
     # ----------------------------------------------------------------
 
-    def get_all_nodes(self, graph_id: str, limit: int = 2000) -> List[Dict[str, Any]]:
+    def get_all_nodes(self, graph_id: str, limit: int = 2000) -> list[dict[str, Any]]:
         def _read(tx):
             result = tx.run(
                 """
@@ -438,7 +441,7 @@ class Neo4jStorage(GraphStorage):
         with self._driver.session() as session:
             return self._call_with_retry(session.execute_read, _read)
 
-    def get_node(self, uuid: str) -> Optional[Dict[str, Any]]:
+    def get_node(self, uuid: str) -> dict[str, Any] | None:
         def _read(tx):
             result = tx.run(
                 "MATCH (n:Entity {uuid: $uuid}) RETURN n, labels(n) AS labels",
@@ -452,7 +455,7 @@ class Neo4jStorage(GraphStorage):
         with self._driver.session() as session:
             return self._call_with_retry(session.execute_read, _read)
 
-    def get_node_edges(self, node_uuid: str) -> List[Dict[str, Any]]:
+    def get_node_edges(self, node_uuid: str) -> list[dict[str, Any]]:
         """O(1) Cypher, NOT a full scan + filter like the old Zep code."""
         def _read(tx):
             result = tx.run(
@@ -470,7 +473,7 @@ class Neo4jStorage(GraphStorage):
         with self._driver.session() as session:
             return self._call_with_retry(session.execute_read, _read)
 
-    def get_nodes_by_label(self, graph_id: str, label: str) -> List[Dict[str, Any]]:
+    def get_nodes_by_label(self, graph_id: str, label: str) -> list[dict[str, Any]]:
         def _read(tx):
             # Dynamic label in query (safe: label comes from ontology, not user input)
             query = f"""
@@ -487,7 +490,7 @@ class Neo4jStorage(GraphStorage):
     # Read edges
     # ----------------------------------------------------------------
 
-    def get_all_edges(self, graph_id: str) -> List[Dict[str, Any]]:
+    def get_all_edges(self, graph_id: str) -> list[dict[str, Any]]:
         def _read(tx):
             result = tx.run(
                 """
@@ -541,7 +544,7 @@ class Neo4jStorage(GraphStorage):
     # Graph info
     # ----------------------------------------------------------------
 
-    def get_graph_info(self, graph_id: str) -> Dict[str, Any]:
+    def get_graph_info(self, graph_id: str) -> dict[str, Any]:
         def _read(tx):
             # Count nodes
             node_result = tx.run(
@@ -579,7 +582,7 @@ class Neo4jStorage(GraphStorage):
         with self._driver.session() as session:
             return self._call_with_retry(session.execute_read, _read)
 
-    def get_graph_data(self, graph_id: str) -> Dict[str, Any]:
+    def get_graph_data(self, graph_id: str) -> dict[str, Any]:
         """
         Full graph dump with enriched edge format (for frontend).
         Includes derived fields: fact_type, source_node_name, target_node_name.
@@ -594,7 +597,7 @@ class Neo4jStorage(GraphStorage):
                 gid=graph_id,
             )
             nodes = []
-            node_map: Dict[str, str] = {}  # uuid -> name
+            node_map: dict[str, str] = {}  # uuid -> name
             for record in node_result:
                 nd = self._node_to_dict(record["n"], record["labels"])
                 nodes.append(nd)
@@ -636,7 +639,7 @@ class Neo4jStorage(GraphStorage):
     # ----------------------------------------------------------------
 
     @staticmethod
-    def _node_to_dict(node, labels: List[str]) -> Dict[str, Any]:
+    def _node_to_dict(node, labels: list[str]) -> dict[str, Any]:
         """Convert Neo4j node to the standard node dict format."""
         props = dict(node)
         attrs_json = props.pop("attributes_json", "{}")
@@ -652,14 +655,14 @@ class Neo4jStorage(GraphStorage):
         return {
             "uuid": props.get("uuid", ""),
             "name": props.get("name", ""),
-            "labels": [l for l in labels if l != "Entity"] if labels else [],
+            "labels": [lbl for lbl in labels if lbl != "Entity"] if labels else [],
             "summary": props.get("summary", ""),
             "attributes": attributes,
             "created_at": props.get("created_at"),
         }
 
     @staticmethod
-    def _edge_to_dict(rel, source_uuid: str, target_uuid: str) -> Dict[str, Any]:
+    def _edge_to_dict(rel, source_uuid: str, target_uuid: str) -> dict[str, Any]:
         """Convert Neo4j relationship to the standard edge dict format."""
         props = dict(rel)
         attrs_json = props.pop("attributes_json", "{}")

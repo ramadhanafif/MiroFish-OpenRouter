@@ -6,7 +6,7 @@ Scoring: 0.7 * vector_score + 0.3 * keyword_score (BM25 via fulltext index).
 """
 
 import logging
-from typing import List, Dict, Any, Optional
+from typing import Any
 
 from neo4j import Session as Neo4jSession
 
@@ -70,7 +70,7 @@ class SearchService:
         graph_id: str,
         query: str,
         limit: int = 10,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Search edges (facts/relations) using hybrid scoring.
 
@@ -100,7 +100,7 @@ class SearchService:
         graph_id: str,
         query: str,
         limit: int = 10,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Search nodes (entities) using hybrid scoring.
 
@@ -122,8 +122,8 @@ class SearchService:
         return merged
 
     def _run_edge_vector_search(
-        self, session: Neo4jSession, graph_id: str, query_vector: List[float], limit: int
-    ) -> List[Dict[str, Any]]:
+        self, session: Neo4jSession, graph_id: str, query_vector: list[float], limit: int
+    ) -> list[dict[str, Any]]:
         """Run vector similarity search on edge fact_embedding."""
         try:
             result = session.run(
@@ -142,7 +142,7 @@ class SearchService:
 
     def _run_edge_keyword_search(
         self, session: Neo4jSession, graph_id: str, query: str, limit: int
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Run fulltext (BM25) search on edge fact + name."""
         try:
             # Escape special Lucene characters in query
@@ -162,8 +162,8 @@ class SearchService:
             return []
 
     def _run_node_vector_search(
-        self, session: Neo4jSession, graph_id: str, query_vector: List[float], limit: int
-    ) -> List[Dict[str, Any]]:
+        self, session: Neo4jSession, graph_id: str, query_vector: list[float], limit: int
+    ) -> list[dict[str, Any]]:
         """Run vector similarity search on entity embedding."""
         try:
             result = session.run(
@@ -182,7 +182,7 @@ class SearchService:
 
     def _run_node_keyword_search(
         self, session: Neo4jSession, graph_id: str, query: str, limit: int
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Run fulltext search on entity name + summary."""
         try:
             safe_query = self._escape_lucene(query)
@@ -202,11 +202,11 @@ class SearchService:
 
     def _merge_results(
         self,
-        vector_results: List[Dict[str, Any]],
-        keyword_results: List[Dict[str, Any]],
+        vector_results: list[dict[str, Any]],
+        keyword_results: list[dict[str, Any]],
         key: str,
         limit: int,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Merge vector and keyword results with weighted scoring.
 
@@ -221,7 +221,7 @@ class SearchService:
         k_scores = {r[key]: r["_score"] / k_max for r in keyword_results}
 
         # Build combined result map
-        all_items: Dict[str, Dict[str, Any]] = {}
+        all_items: dict[str, dict[str, Any]] = {}
         for r in vector_results:
             all_items[r[key]] = {k: v for k, v in r.items() if k != "_score"}
         for r in keyword_results:

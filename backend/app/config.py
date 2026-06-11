@@ -4,6 +4,7 @@ Loads configuration from .env file in project root directory
 """
 
 import os
+
 from dotenv import load_dotenv
 
 # Load .env file from project root
@@ -66,6 +67,11 @@ class Config:
         'LIKE_COMMENT', 'DISLIKE_COMMENT', 'SEARCH_POSTS', 'SEARCH_USER',
         'TREND', 'REFRESH', 'DO_NOTHING', 'FOLLOW', 'MUTE'
     ]
+
+    # ntfy push notifications (disabled unless NTFY_TOPIC is set)
+    NTFY_URL = os.environ.get('NTFY_URL', 'https://ntfy.sh')
+    NTFY_TOPIC = os.environ.get('NTFY_TOPIC', '')
+    NTFY_TOKEN = os.environ.get('NTFY_TOKEN', '')
 
     # Report Agent configuration
     REPORT_AGENT_MAX_TOOL_CALLS = int(os.environ.get('REPORT_AGENT_MAX_TOOL_CALLS', '5'))

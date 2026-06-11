@@ -6,7 +6,8 @@ Current implementation: Neo4jStorage (neo4j_storage.py).
 """
 
 from abc import ABC, abstractmethod
-from typing import Dict, Any, List, Optional, Callable
+from collections.abc import Callable
+from typing import Any
 
 
 class GraphStorage(ABC):
@@ -23,11 +24,11 @@ class GraphStorage(ABC):
         """Delete a graph and all its nodes/edges."""
 
     @abstractmethod
-    def set_ontology(self, graph_id: str, ontology: Dict[str, Any]) -> None:
+    def set_ontology(self, graph_id: str, ontology: dict[str, Any]) -> None:
         """Store ontology (entity types + relation types) for a graph."""
 
     @abstractmethod
-    def get_ontology(self, graph_id: str) -> Dict[str, Any]:
+    def get_ontology(self, graph_id: str) -> dict[str, Any]:
         """Retrieve stored ontology for a graph."""
 
     # --- Add data ---
@@ -43,17 +44,17 @@ class GraphStorage(ABC):
     def add_text_batch(
         self,
         graph_id: str,
-        chunks: List[str],
+        chunks: list[str],
         batch_size: int = 3,
-        progress_callback: Optional[Callable] = None,
-    ) -> List[str]:
+        progress_callback: Callable | None = None,
+    ) -> list[str]:
         """Batch-add text chunks. Returns list of episode_ids."""
 
     @abstractmethod
     def wait_for_processing(
         self,
-        episode_ids: List[str],
-        progress_callback: Optional[Callable] = None,
+        episode_ids: list[str],
+        progress_callback: Callable | None = None,
         timeout: int = 600,
     ) -> None:
         """
@@ -65,25 +66,25 @@ class GraphStorage(ABC):
     # --- Read nodes ---
 
     @abstractmethod
-    def get_all_nodes(self, graph_id: str, limit: int = 2000) -> List[Dict[str, Any]]:
+    def get_all_nodes(self, graph_id: str, limit: int = 2000) -> list[dict[str, Any]]:
         """Get all nodes in a graph (with optional limit)."""
 
     @abstractmethod
-    def get_node(self, uuid: str) -> Optional[Dict[str, Any]]:
+    def get_node(self, uuid: str) -> dict[str, Any] | None:
         """Get a single node by UUID."""
 
     @abstractmethod
-    def get_node_edges(self, node_uuid: str) -> List[Dict[str, Any]]:
+    def get_node_edges(self, node_uuid: str) -> list[dict[str, Any]]:
         """Get all edges connected to a node (O(1) via Cypher, not full scan)."""
 
     @abstractmethod
-    def get_nodes_by_label(self, graph_id: str, label: str) -> List[Dict[str, Any]]:
+    def get_nodes_by_label(self, graph_id: str, label: str) -> list[dict[str, Any]]:
         """Get nodes filtered by entity type label."""
 
     # --- Read edges ---
 
     @abstractmethod
-    def get_all_edges(self, graph_id: str) -> List[Dict[str, Any]]:
+    def get_all_edges(self, graph_id: str) -> list[dict[str, Any]]:
         """Get all edges in a graph."""
 
     # --- Search ---
@@ -112,11 +113,11 @@ class GraphStorage(ABC):
     # --- Graph info ---
 
     @abstractmethod
-    def get_graph_info(self, graph_id: str) -> Dict[str, Any]:
+    def get_graph_info(self, graph_id: str) -> dict[str, Any]:
         """Get graph metadata (node count, edge count, entity types)."""
 
     @abstractmethod
-    def get_graph_data(self, graph_id: str) -> Dict[str, Any]:
+    def get_graph_data(self, graph_id: str) -> dict[str, Any]:
         """
         Get full graph data (enriched format for frontend).
 

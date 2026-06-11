@@ -4,19 +4,20 @@ Uses project context mechanism with server-side state persistence
 """
 
 import os
-import traceback
 import threading
-from flask import request, jsonify, current_app
+import traceback
 
-from . import graph_bp
+from flask import current_app, jsonify, request
+
 from ..config import Config
-from ..services.ontology_generator import OntologyGenerator
+from ..models.project import ProjectManager, ProjectStatus
+from ..models.task import TaskManager, TaskStatus
 from ..services.graph_builder import GraphBuilderService
+from ..services.ontology_generator import OntologyGenerator
 from ..services.text_processor import TextProcessor
 from ..utils.file_parser import FileParser
 from ..utils.logger import get_logger
-from ..models.task import TaskManager, TaskStatus
-from ..models.project import ProjectManager, ProjectStatus
+from . import graph_bp
 
 # Get logger
 logger = get_logger('mirofish.api')
@@ -46,13 +47,13 @@ def get_project(project_id: str):
     Get project details
     """
     project = ProjectManager.get_project(project_id)
-    
+
     if not project:
         return jsonify({
             "success": False,
             "error": f"Project does not exist: {project_id}"
         }), 404
-    
+
     return jsonify({
         "success": True,
         "data": project.to_dict()
@@ -66,7 +67,7 @@ def list_projects():
     """
     limit = request.args.get('limit', 50, type=int)
     projects = ProjectManager.list_projects(limit=limit)
-    
+
     return jsonify({
         "success": True,
         "data": [p.to_dict() for p in projects],
@@ -183,7 +184,7 @@ def generate_ontology():
         project = ProjectManager.create_project(name=project_name)
         project.simulation_requirement = simulation_requirement
         logger.info(f"Project created: {project.project_id}")
-        
+
         # Save files and extract text
         document_texts = []
         all_text = ""
@@ -232,7 +233,7 @@ def generate_ontology():
         entity_count = len(ontology.get("entity_types", []))
         edge_count = len(ontology.get("edge_types", []))
         logger.info(f"Ontology generation completed: {entity_count} entity types, {edge_count} relation types")
-        
+
         project.ontology = {
             "entity_types": ontology.get("entity_types", []),
             "edge_types": ontology.get("edge_types", [])
@@ -241,7 +242,7 @@ def generate_ontology():
         project.status = ProjectStatus.ONTOLOGY_GENERATED
         ProjectManager.save_project(project)
         logger.info(f"=== Ontology generation completed === Project ID: {project.project_id}")
-        
+
         return jsonify({
             "success": True,
             "data": {
@@ -253,7 +254,7 @@ def generate_ontology():
                 "total_text_length": project.total_text_length
             }
         })
-        
+
     except Exception as e:
         return jsonify({
             "success": False,
@@ -294,7 +295,7 @@ def build_graph():
         data = request.get_json() or {}
         project_id = data.get('project_id')
         logger.debug(f"Request parameters: project_id={project_id}")
-        
+
         if not project_id:
             return jsonify({
                 "success": False,
@@ -364,7 +365,7 @@ def build_graph():
         task_manager = TaskManager()
         task_id = task_manager.create_task(f"Build graph: {graph_name}")
         logger.info(f"Graph build task created: task_id={task_id}, project_id={project_id}")
-        
+
         # Update project status
         project.status = ProjectStatus.GRAPH_BUILDING
         project.graph_build_task_id = task_id
@@ -416,7 +417,7 @@ def build_graph():
                     progress=15
                 )
                 builder.set_ontology(graph_id, ontology)
-                
+
                 # Add text (progress_callback signature is (msg, progress_ratio))
                 def add_progress_callback(msg, progress_ratio):
                     progress = 15 + int(progress_ratio * 40)  # 15% - 55%
@@ -432,7 +433,7 @@ def build_graph():
                     progress=15
                 )
 
-                episode_uuids = builder.add_text_batches(
+                builder.add_text_batches(
                     graph_id,
                     chunks,
                     batch_size=3,
@@ -505,7 +506,7 @@ def build_graph():
                 "message": "Graph build task started. Query progress via /task/{task_id}"
             }
         })
-        
+
     except Exception as e:
         return jsonify({
             "success": False,
@@ -541,7 +542,7 @@ def list_tasks():
     List all tasks
     """
     tasks = TaskManager().list_tasks()
-    
+
     return jsonify({
         "success": True,
         "data": [t.to_dict() for t in tasks],

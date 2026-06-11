@@ -62,9 +62,30 @@ build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
+    "pyrefly>=1.0.0",
     "pytest>=8.0.0",
     "pytest-asyncio>=0.23.0",
+    "ruff>=0.15.16",
 ]
 
 [tool.hatch.build.targets.wheel]
 packages = ["app"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+extend-exclude = ["uploads"]
+
+[tool.ruff.lint]
+# E/W: pycodestyle, F: pyflakes (real bugs), I: import sorting,
+# B: bugbear (likely bugs), UP: outdated syntax
+select = ["E", "W", "F", "I", "B", "UP"]
+ignore = [
+    "E501",  # long lines: prompts and log messages routinely exceed any limit
+    "E402",  # module-level import not at top: config/env setup precedes imports in entry points
+    "UP042", # class Foo(str, Enum) works fine; converting to StrEnum is churn without benefit
+]
+
+[tool.pyrefly]
+project-includes = ["app", "run.py"]
+project-excludes = ["**/uploads/**", "scripts/**"]

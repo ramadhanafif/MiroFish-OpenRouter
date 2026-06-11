@@ -17,7 +17,12 @@ npm run build         # frontend production build
 cd backend && uv run pytest   # pytest is in dev deps; only scripts/test_profile_format.py exists
 ```
 
-No linter is configured. The Vite dev server proxies `/api` → `http://localhost:5001`.
+```bash
+cd backend && uv run ruff check app run.py scripts   # lint; must pass (config in pyproject.toml)
+cd backend && uv run pyrefly check                   # type check; ~75 pre-existing findings, advisory for now
+```
+
+The Vite dev server proxies `/api` → `http://localhost:5001`.
 
 **Required external services** (the backend starts without them but endpoints return 503):
 - Neo4j ≥ **5.18** (`neo4j:5.18-community`, auth `neo4j/mirofish`). 5.18 is a hard floor because relationship vector indexes don't exist before it

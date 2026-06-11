@@ -3,12 +3,12 @@ Task Status Management
 Tracks long-running tasks (like graph building)
 """
 
-import uuid
 import threading
+import uuid
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Dict, Any, Optional
-from dataclasses import dataclass, field
+from typing import Any
 
 
 class TaskStatus(str, Enum):
@@ -29,12 +29,12 @@ class Task:
     updated_at: datetime
     progress: int = 0              # Overall progress percentage 0-100
     message: str = ""              # Status message
-    result: Optional[Dict] = None  # Task result
-    error: Optional[str] = None    # Error message
-    metadata: Dict = field(default_factory=dict)  # Additional metadata
-    progress_detail: Dict = field(default_factory=dict)  # Detailed progress information
+    result: dict | None = None  # Task result
+    error: str | None = None    # Error message
+    metadata: dict = field(default_factory=dict)  # Additional metadata
+    progress_detail: dict = field(default_factory=dict)  # Detailed progress information
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary"""
         return {
             "task_id": self.task_id,
@@ -66,11 +66,11 @@ class TaskManager:
             with cls._lock:
                 if cls._instance is None:
                     cls._instance = super().__new__(cls)
-                    cls._instance._tasks: Dict[str, Task] = {}
+                    cls._instance._tasks: dict[str, Task] = {}
                     cls._instance._task_lock = threading.Lock()
         return cls._instance
 
-    def create_task(self, task_type: str, metadata: Optional[Dict] = None) -> str:
+    def create_task(self, task_type: str, metadata: dict | None = None) -> str:
         """
         Create new task
 
@@ -98,7 +98,7 @@ class TaskManager:
 
         return task_id
 
-    def get_task(self, task_id: str) -> Optional[Task]:
+    def get_task(self, task_id: str) -> Task | None:
         """Get task"""
         with self._task_lock:
             return self._tasks.get(task_id)
@@ -106,12 +106,12 @@ class TaskManager:
     def update_task(
         self,
         task_id: str,
-        status: Optional[TaskStatus] = None,
-        progress: Optional[int] = None,
-        message: Optional[str] = None,
-        result: Optional[Dict] = None,
-        error: Optional[str] = None,
-        progress_detail: Optional[Dict] = None
+        status: TaskStatus | None = None,
+        progress: int | None = None,
+        message: str | None = None,
+        result: dict | None = None,
+        error: str | None = None,
+        progress_detail: dict | None = None
     ):
         """
         Update task status
@@ -142,7 +142,7 @@ class TaskManager:
                 if progress_detail is not None:
                     task.progress_detail = progress_detail
 
-    def complete_task(self, task_id: str, result: Dict):
+    def complete_task(self, task_id: str, result: dict):
         """Mark task as completed"""
         self.update_task(
             task_id,
@@ -161,7 +161,7 @@ class TaskManager:
             error=error
         )
 
-    def list_tasks(self, task_type: Optional[str] = None) -> list:
+    def list_tasks(self, task_type: str | None = None) -> list:
         """List tasks"""
         with self._task_lock:
             tasks = list(self._tasks.values())

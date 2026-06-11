@@ -7,7 +7,7 @@ entities and relations from text chunks, guided by the graph's ontology.
 """
 
 import logging
-from typing import Dict, Any, List, Optional
+from typing import Any
 
 from ..utils.llm_client import LLMClient
 
@@ -46,11 +46,11 @@ _USER_PROMPT = """Extract entities and relations from the following text:
 class NERExtractor:
     """Extract entities and relations from text using local LLM."""
 
-    def __init__(self, llm_client: Optional[LLMClient] = None, max_retries: int = 2):
+    def __init__(self, llm_client: LLMClient | None = None, max_retries: int = 2):
         self.llm = llm_client or LLMClient()
         self.max_retries = max_retries
 
-    def extract(self, text: str, ontology: Dict[str, Any]) -> Dict[str, Any]:
+    def extract(self, text: str, ontology: dict[str, Any]) -> dict[str, Any]:
         """
         Extract entities and relations from text, guided by ontology.
 
@@ -103,7 +103,7 @@ class NERExtractor:
         )
         return {"entities": [], "relations": []}
 
-    def _format_ontology(self, ontology: Dict[str, Any]) -> str:
+    def _format_ontology(self, ontology: dict[str, Any]) -> str:
         """Format ontology dict into readable text for the LLM prompt."""
         parts = []
 
@@ -149,8 +149,8 @@ class NERExtractor:
         return "\n".join(parts)
 
     def _validate_and_clean(
-        self, result: Dict[str, Any], ontology: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, result: dict[str, Any], ontology: dict[str, Any]
+    ) -> dict[str, Any]:
         """Validate and normalize LLM output."""
         entities = result.get("entities", [])
         relations = result.get("relations", [])

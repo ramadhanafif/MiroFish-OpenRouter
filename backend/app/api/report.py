@@ -4,18 +4,18 @@ Provides interfaces for simulation report generation, retrieval, and conversatio
 """
 
 import os
-import traceback
 import threading
-from flask import request, jsonify, send_file, current_app
+import traceback
 
-from . import report_bp
-from ..config import Config
-from ..services.report_agent import ReportAgent, ReportManager, ReportStatus
-from ..services.simulation_manager import SimulationManager
+from flask import current_app, jsonify, request, send_file
+
 from ..models.project import ProjectManager
 from ..models.task import TaskManager, TaskStatus
 from ..services.graph_tools import GraphToolsService
+from ..services.report_agent import ReportAgent, ReportManager, ReportStatus
+from ..services.simulation_manager import SimulationManager
 from ..utils.logger import get_logger
+from . import report_bp
 
 logger = get_logger('mirofish.api.report')
 
@@ -306,7 +306,7 @@ def get_single_section(report_id: str, section_index: int):
         section_path = ReportManager._get_section_path(report_id, section_index)
         if not os.path.exists(section_path):
             return jsonify({"success": False, "error": f"Section does not exist: section_{section_index:02d}.md"}), 404
-        with open(section_path, 'r', encoding='utf-8') as f:
+        with open(section_path, encoding='utf-8') as f:
             content = f.read()
         return jsonify({"success": True, "data": {"filename": f"section_{section_index:02d}.md", "content": content}})
     except Exception as e:

@@ -11,12 +11,12 @@ Core Retrieval Tools (Optimized):
 """
 
 import json
-from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
+from typing import Any
 
-from ..utils.logger import get_logger
-from ..utils.llm_client import LLMClient
 from ..storage import GraphStorage
+from ..utils.llm_client import LLMClient
+from ..utils.logger import get_logger
 
 logger = get_logger('mirofish.graph_tools')
 
@@ -24,13 +24,13 @@ logger = get_logger('mirofish.graph_tools')
 @dataclass
 class SearchResult:
     """Search Result"""
-    facts: List[str]
-    edges: List[Dict[str, Any]]
-    nodes: List[Dict[str, Any]]
+    facts: list[str]
+    edges: list[dict[str, Any]]
+    nodes: list[dict[str, Any]]
     query: str
     total_count: int
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "facts": self.facts,
             "edges": self.edges,
@@ -56,11 +56,11 @@ class NodeInfo:
     """Node Information"""
     uuid: str
     name: str
-    labels: List[str]
+    labels: list[str]
     summary: str
-    attributes: Dict[str, Any]
+    attributes: dict[str, Any]
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "uuid": self.uuid,
             "name": self.name,
@@ -83,15 +83,15 @@ class EdgeInfo:
     fact: str
     source_node_uuid: str
     target_node_uuid: str
-    source_node_name: Optional[str] = None
-    target_node_name: Optional[str] = None
+    source_node_name: str | None = None
+    target_node_name: str | None = None
     # Temporal information (may be absent in Neo4j; kept for interface compat)
-    created_at: Optional[str] = None
-    valid_at: Optional[str] = None
-    invalid_at: Optional[str] = None
-    expired_at: Optional[str] = None
+    created_at: str | None = None
+    valid_at: str | None = None
+    invalid_at: str | None = None
+    expired_at: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "uuid": self.uuid,
             "name": self.name,
@@ -140,19 +140,19 @@ class InsightForgeResult:
     """
     query: str
     simulation_requirement: str
-    sub_queries: List[str]
+    sub_queries: list[str]
 
     # Retrieval results by dimension
-    semantic_facts: List[str] = field(default_factory=list)
-    entity_insights: List[Dict[str, Any]] = field(default_factory=list)
-    relationship_chains: List[str] = field(default_factory=list)
+    semantic_facts: list[str] = field(default_factory=list)
+    entity_insights: list[dict[str, Any]] = field(default_factory=list)
+    relationship_chains: list[str] = field(default_factory=list)
 
     # Statistical information
     total_facts: int = 0
     total_entities: int = 0
     total_relationships: int = 0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "query": self.query,
             "simulation_requirement": self.simulation_requirement,
@@ -168,27 +168,27 @@ class InsightForgeResult:
     def to_text(self) -> str:
         """Convert to detailed text format for LLM understanding"""
         text_parts = [
-            f"## Future Prediction Deep Analysis",
+            "## Future Prediction Deep Analysis",
             f"Analysis Query: {self.query}",
             f"Prediction Scenario: {self.simulation_requirement}",
-            f"\n### Prediction Data Statistics",
+            "\n### Prediction Data Statistics",
             f"- Related Prediction Facts: {self.total_facts}",
             f"- Involved Entities: {self.total_entities}",
             f"- Relationship Chains: {self.total_relationships}"
         ]
 
         if self.sub_queries:
-            text_parts.append(f"\n### Analysis Sub-Questions")
+            text_parts.append("\n### Analysis Sub-Questions")
             for i, sq in enumerate(self.sub_queries, 1):
                 text_parts.append(f"{i}. {sq}")
 
         if self.semantic_facts:
-            text_parts.append(f"\n### Key Facts (Please quote these verbatim in the report)")
+            text_parts.append("\n### Key Facts (Please quote these verbatim in the report)")
             for i, fact in enumerate(self.semantic_facts, 1):
                 text_parts.append(f'{i}. "{fact}"')
 
         if self.entity_insights:
-            text_parts.append(f"\n### Core Entities")
+            text_parts.append("\n### Core Entities")
             for entity in self.entity_insights:
                 text_parts.append(f"- **{entity.get('name', 'Unknown')}** ({entity.get('type', 'Entity')})")
                 if entity.get('summary'):
@@ -197,7 +197,7 @@ class InsightForgeResult:
                     text_parts.append(f"  Related Facts: {len(entity.get('related_facts', []))} facts")
 
         if self.relationship_chains:
-            text_parts.append(f"\n### Relationship Chains")
+            text_parts.append("\n### Relationship Chains")
             for chain in self.relationship_chains:
                 text_parts.append(f"- {chain}")
 
@@ -212,17 +212,17 @@ class PanoramaResult:
     """
     query: str
 
-    all_nodes: List[NodeInfo] = field(default_factory=list)
-    all_edges: List[EdgeInfo] = field(default_factory=list)
-    active_facts: List[str] = field(default_factory=list)
-    historical_facts: List[str] = field(default_factory=list)
+    all_nodes: list[NodeInfo] = field(default_factory=list)
+    all_edges: list[EdgeInfo] = field(default_factory=list)
+    active_facts: list[str] = field(default_factory=list)
+    historical_facts: list[str] = field(default_factory=list)
 
     total_nodes: int = 0
     total_edges: int = 0
     active_count: int = 0
     historical_count: int = 0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "query": self.query,
             "all_nodes": [n.to_dict() for n in self.all_nodes],
@@ -238,9 +238,9 @@ class PanoramaResult:
     def to_text(self) -> str:
         """Convert to text format (complete version, no truncation)"""
         text_parts = [
-            f"## Breadth Search Results (Future Panoramic View)",
+            "## Breadth Search Results (Future Panoramic View)",
             f"Query: {self.query}",
-            f"\n### Statistics",
+            "\n### Statistics",
             f"- Total Nodes: {self.total_nodes}",
             f"- Total Edges: {self.total_edges}",
             f"- Current Valid Facts: {self.active_count}",
@@ -248,17 +248,17 @@ class PanoramaResult:
         ]
 
         if self.active_facts:
-            text_parts.append(f"\n### Current Valid Facts (Simulation Results Verbatim)")
+            text_parts.append("\n### Current Valid Facts (Simulation Results Verbatim)")
             for i, fact in enumerate(self.active_facts, 1):
                 text_parts.append(f'{i}. "{fact}"')
 
         if self.historical_facts:
-            text_parts.append(f"\n### Historical/Expired Facts (Evolution Record)")
+            text_parts.append("\n### Historical/Expired Facts (Evolution Record)")
             for i, fact in enumerate(self.historical_facts, 1):
                 text_parts.append(f'{i}. "{fact}"')
 
         if self.all_nodes:
-            text_parts.append(f"\n### Involved Entities")
+            text_parts.append("\n### Involved Entities")
             for node in self.all_nodes:
                 entity_type = next((la for la in node.labels if la not in ["Entity", "Node"]), "Entity")
                 text_parts.append(f"- **{node.name}** ({entity_type})")
@@ -274,9 +274,9 @@ class AgentInterview:
     agent_bio: str
     question: str
     response: str
-    key_quotes: List[str] = field(default_factory=list)
+    key_quotes: list[str] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "agent_name": self.agent_name,
             "agent_role": self.agent_role,
@@ -324,10 +324,10 @@ class InterviewResult:
     Contains interview responses from multiple simulated Agents
     """
     interview_topic: str
-    interview_questions: List[str]
+    interview_questions: list[str]
 
-    selected_agents: List[Dict[str, Any]] = field(default_factory=list)
-    interviews: List[AgentInterview] = field(default_factory=list)
+    selected_agents: list[dict[str, Any]] = field(default_factory=list)
+    interviews: list[AgentInterview] = field(default_factory=list)
 
     selection_reasoning: str = ""
     summary: str = ""
@@ -335,7 +335,7 @@ class InterviewResult:
     total_agents: int = 0
     interviewed_count: int = 0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "interview_topic": self.interview_topic,
             "interview_questions": self.interview_questions,
@@ -393,7 +393,7 @@ class GraphToolsService:
     - get_entity_summary - Get entity relationship summary
     """
 
-    def __init__(self, storage: GraphStorage, llm_client: Optional[LLMClient] = None):
+    def __init__(self, storage: GraphStorage, llm_client: LLMClient | None = None):
         self.storage = storage
         self._llm_client = llm_client
         logger.info("GraphToolsService initialization complete")
@@ -537,7 +537,7 @@ class GraphToolsService:
 
                 scored_edges.sort(key=lambda x: x[0], reverse=True)
 
-                for score, edge in scored_edges[:limit]:
+                for _score, edge in scored_edges[:limit]:
                     fact = edge.get("fact", "")
                     if fact:
                         facts.append(fact)
@@ -559,7 +559,7 @@ class GraphToolsService:
 
                 scored_nodes.sort(key=lambda x: x[0], reverse=True)
 
-                for score, node in scored_nodes[:limit]:
+                for _score, node in scored_nodes[:limit]:
                     nodes_result.append({
                         "uuid": node.get("uuid", ""),
                         "name": node.get("name", ""),
@@ -583,7 +583,7 @@ class GraphToolsService:
             total_count=len(facts)
         )
 
-    def get_all_nodes(self, graph_id: str) -> List[NodeInfo]:
+    def get_all_nodes(self, graph_id: str) -> list[NodeInfo]:
         """Get all nodes in the graph"""
         logger.info(f"Getting all nodes in graph {graph_id}...")
 
@@ -602,7 +602,7 @@ class GraphToolsService:
         logger.info(f"Retrieved {len(result)} nodes")
         return result
 
-    def get_all_edges(self, graph_id: str, include_temporal: bool = True) -> List[EdgeInfo]:
+    def get_all_edges(self, graph_id: str, include_temporal: bool = True) -> list[EdgeInfo]:
         """Get all edges in the graph (with temporal information)"""
         logger.info(f"Getting all edges in graph {graph_id}...")
 
@@ -629,7 +629,7 @@ class GraphToolsService:
         logger.info(f"Retrieved {len(result)} edges")
         return result
 
-    def get_node_detail(self, node_uuid: str) -> Optional[NodeInfo]:
+    def get_node_detail(self, node_uuid: str) -> NodeInfo | None:
         """Get detailed information about a single node"""
         logger.info(f"Getting node details: {node_uuid[:8]}...")
 
@@ -649,7 +649,7 @@ class GraphToolsService:
             logger.error(f"Failed to get node details: {str(e)}")
             return None
 
-    def get_node_edges(self, graph_id: str, node_uuid: str) -> List[EdgeInfo]:
+    def get_node_edges(self, graph_id: str, node_uuid: str) -> list[EdgeInfo]:
         """
         Get all edges related to a node
 
@@ -686,7 +686,7 @@ class GraphToolsService:
         self,
         graph_id: str,
         entity_type: str
-    ) -> List[NodeInfo]:
+    ) -> list[NodeInfo]:
         """Get entities by type"""
         logger.info(f"Getting entities of type {entity_type}...")
 
@@ -710,7 +710,7 @@ class GraphToolsService:
         self,
         graph_id: str,
         entity_name: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Get relationship summary for a specific entity"""
         logger.info(f"Getting relationship summary for entity {entity_name}...")
 
@@ -739,7 +739,7 @@ class GraphToolsService:
             "total_relations": len(related_edges)
         }
 
-    def get_graph_statistics(self, graph_id: str) -> Dict[str, Any]:
+    def get_graph_statistics(self, graph_id: str) -> dict[str, Any]:
         """Get statistics for the graph"""
         logger.info(f"Getting statistics for graph {graph_id}...")
 
@@ -769,7 +769,7 @@ class GraphToolsService:
         graph_id: str,
         simulation_requirement: str,
         limit: int = 30
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Get simulation-related context information"""
         logger.info(f"Getting simulation context: {simulation_requirement[:50]}...")
 
@@ -944,7 +944,7 @@ class GraphToolsService:
         simulation_requirement: str,
         report_context: str = "",
         max_queries: int = 5
-    ) -> List[str]:
+    ) -> list[str]:
         """Use LLM to generate sub-questions"""
         system_prompt = """You are a professional question analysis expert. Your task is to decompose a complex question into multiple sub-questions that can be independently observed in a simulated world.
 
@@ -1020,8 +1020,8 @@ Return the sub-questions as a JSON list."""
             if not edge.fact:
                 continue
 
-            source_name = node_map.get(edge.source_node_uuid, NodeInfo('', '', [], '', {})).name or edge.source_node_uuid[:8]
-            target_name = node_map.get(edge.target_node_uuid, NodeInfo('', '', [], '', {})).name or edge.target_node_uuid[:8]
+            node_map.get(edge.source_node_uuid, NodeInfo('', '', [], '', {})).name or edge.source_node_uuid[:8]
+            node_map.get(edge.target_node_uuid, NodeInfo('', '', [], '', {})).name or edge.target_node_uuid[:8]
 
             is_historical = edge.is_expired or edge.is_invalid
 
@@ -1086,7 +1086,7 @@ Return the sub-questions as a JSON list."""
         interview_requirement: str,
         simulation_requirement: str = "",
         max_agents: int = 5,
-        custom_questions: List[str] = None
+        custom_questions: list[str] = None
     ) -> InterviewResult:
         """
         [InterviewAgents - Deep Interview]
@@ -1278,10 +1278,10 @@ Return the sub-questions as a JSON list."""
                 return match.group(1).replace('\\n', '\n').replace('\\"', '"')
         return response
 
-    def _load_agent_profiles(self, simulation_id: str) -> List[Dict[str, Any]]:
+    def _load_agent_profiles(self, simulation_id: str) -> list[dict[str, Any]]:
         """Load Agent profile files for simulation"""
-        import os
         import csv
+        import os
 
         sim_dir = os.path.join(
             os.path.dirname(__file__),
@@ -1294,7 +1294,7 @@ Return the sub-questions as a JSON list."""
         reddit_profile_path = os.path.join(sim_dir, "reddit_profiles.json")
         if os.path.exists(reddit_profile_path):
             try:
-                with open(reddit_profile_path, 'r', encoding='utf-8') as f:
+                with open(reddit_profile_path, encoding='utf-8') as f:
                     profiles = json.load(f)
                 logger.info(f"Loaded {len(profiles)} profiles from reddit_profiles.json")
                 return profiles
@@ -1305,7 +1305,7 @@ Return the sub-questions as a JSON list."""
         twitter_profile_path = os.path.join(sim_dir, "twitter_profiles.csv")
         if os.path.exists(twitter_profile_path):
             try:
-                with open(twitter_profile_path, 'r', encoding='utf-8') as f:
+                with open(twitter_profile_path, encoding='utf-8') as f:
                     reader = csv.DictReader(f)
                     for row in reader:
                         profiles.append({
@@ -1324,7 +1324,7 @@ Return the sub-questions as a JSON list."""
 
     def _select_agents_for_interview(
         self,
-        profiles: List[Dict[str, Any]],
+        profiles: list[dict[str, Any]],
         interview_requirement: str,
         simulation_requirement: str,
         max_agents: int
@@ -1398,8 +1398,8 @@ Please select up to {max_agents} most suitable Agents for interview and explain 
         self,
         interview_requirement: str,
         simulation_requirement: str,
-        selected_agents: List[Dict[str, Any]]
-    ) -> List[str]:
+        selected_agents: list[dict[str, Any]]
+    ) -> list[str]:
         """Use LLM to generate interview questions"""
 
         agent_roles = [a.get("profession", "Unknown") for a in selected_agents]
@@ -1445,7 +1445,7 @@ Please generate 3-5 interview questions."""
 
     def _generate_interview_summary(
         self,
-        interviews: List[AgentInterview],
+        interviews: list[AgentInterview],
         interview_requirement: str
     ) -> str:
         """Generate interview summary"""

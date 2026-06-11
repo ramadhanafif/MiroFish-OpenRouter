@@ -6,7 +6,8 @@ Unified OpenAI format API calls (OpenRouter, OpenAI, or any compatible server)
 import json
 import logging
 import re
-from typing import Optional, Dict, Any, List
+from typing import Any
+
 from openai import OpenAI
 
 from ..config import Config
@@ -19,9 +20,9 @@ class LLMClient:
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
-        base_url: Optional[str] = None,
-        model: Optional[str] = None,
+        api_key: str | None = None,
+        base_url: str | None = None,
+        model: str | None = None,
         timeout: float = 300.0
     ):
         self.api_key = api_key or Config.LLM_API_KEY
@@ -39,10 +40,10 @@ class LLMClient:
 
     def chat(
         self,
-        messages: List[Dict[str, str]],
+        messages: list[dict[str, str]],
         temperature: float = 0.7,
         max_tokens: int = 4096,
-        response_format: Optional[Dict] = None,
+        response_format: dict | None = None,
         retries: int = 2
     ) -> str:
         """
@@ -90,11 +91,11 @@ class LLMClient:
 
     def chat_json(
         self,
-        messages: List[Dict[str, str]],
+        messages: list[dict[str, str]],
         temperature: float = 0.3,
         max_tokens: int = 4096,
         retries: int = 2
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Send chat request and return JSON
 
@@ -126,10 +127,10 @@ class LLMClient:
                         f"LLM JSON response invalid, retrying ({attempt + 1}/{retries}): "
                         f"{str(e)[:200]}"
                     )
-        raise last_error
+        raise last_error if last_error is not None else RuntimeError('LLM JSON retries exhausted without an error')
 
     @staticmethod
-    def _parse_json(response: str) -> Dict[str, Any]:
+    def _parse_json(response: str) -> dict[str, Any]:
         """Parse a JSON object out of an LLM response, tolerating markdown fences and prose."""
         # Clean markdown code block markers
         cleaned_response = response.strip()

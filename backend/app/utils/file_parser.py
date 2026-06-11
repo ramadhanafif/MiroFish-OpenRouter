@@ -3,9 +3,7 @@ File Parser Utility
 Supports text extraction from PDF, Markdown, TXT files
 """
 
-import os
 from pathlib import Path
-from typing import List, Optional
 
 
 def _read_text_with_fallback(file_path: str) -> str:
@@ -25,7 +23,7 @@ def _read_text_with_fallback(file_path: str) -> str:
         Decoded text content
     """
     data = Path(file_path).read_bytes()
-    
+
     # First try UTF-8
     try:
         return data.decode('utf-8')
@@ -98,8 +96,8 @@ class FileParser:
         """Extract text from PDF"""
         try:
             import fitz  # PyMuPDF
-        except ImportError:
-            raise ImportError("PyMuPDF required: pip install PyMuPDF")
+        except ImportError as e:
+            raise ImportError("PyMuPDF required: pip install PyMuPDF") from e
 
         text_parts = []
         with fitz.open(file_path) as doc:
@@ -121,7 +119,7 @@ class FileParser:
         return _read_text_with_fallback(file_path)
 
     @classmethod
-    def extract_from_multiple(cls, file_paths: List[str]) -> str:
+    def extract_from_multiple(cls, file_paths: list[str]) -> str:
         """
         Extract text from multiple files and merge
 
@@ -148,7 +146,7 @@ def split_text_into_chunks(
     text: str,
     chunk_size: int = 500,
     overlap: int = 50
-) -> List[str]:
+) -> list[str]:
     """
     Split text into chunks
 

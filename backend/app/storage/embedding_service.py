@@ -6,9 +6,8 @@ Vector dimension is configured via EMBEDDING_DIMENSIONS and must match
 the chosen model (text-embedding-3-small = 1536).
 """
 
-import time
 import logging
-from typing import List, Optional
+import time
 
 import requests
 
@@ -22,10 +21,10 @@ class EmbeddingService:
 
     def __init__(
         self,
-        model: Optional[str] = None,
-        base_url: Optional[str] = None,
-        api_key: Optional[str] = None,
-        dimensions: Optional[int] = None,
+        model: str | None = None,
+        base_url: str | None = None,
+        api_key: str | None = None,
+        dimensions: int | None = None,
         max_retries: int = 3,
         timeout: int = 60,
     ):
@@ -39,10 +38,10 @@ class EmbeddingService:
 
         # Simple in-memory cache (text -> embedding vector)
         # Using dict instead of lru_cache because lists aren't hashable
-        self._cache: dict[str, List[float]] = {}
+        self._cache: dict[str, list[float]] = {}
         self._cache_max_size = 2000
 
-    def embed(self, text: str) -> List[float]:
+    def embed(self, text: str) -> list[float]:
         """
         Generate embedding for a single text.
 
@@ -72,7 +71,7 @@ class EmbeddingService:
 
         return vector
 
-    def embed_batch(self, texts: List[str], batch_size: int = 32) -> List[List[float]]:
+    def embed_batch(self, texts: list[str], batch_size: int = 32) -> list[list[float]]:
         """
         Generate embeddings for multiple texts.
 
@@ -88,9 +87,9 @@ class EmbeddingService:
         if not texts:
             return []
 
-        results: List[Optional[List[float]]] = [None] * len(texts)
-        uncached_indices: List[int] = []
-        uncached_texts: List[str] = []
+        results: list[list[float] | None] = [None] * len(texts)
+        uncached_indices: list[int] = []
+        uncached_texts: list[str] = []
 
         # Check cache first
         for i, text in enumerate(texts):
@@ -106,20 +105,20 @@ class EmbeddingService:
 
         # Batch-embed uncached texts
         if uncached_texts:
-            all_vectors: List[List[float]] = []
+            all_vectors: list[list[float]] = []
             for start in range(0, len(uncached_texts), batch_size):
                 batch = uncached_texts[start:start + batch_size]
                 vectors = self._request_embeddings(batch)
                 all_vectors.extend(vectors)
 
             # Place results and cache
-            for idx, vec, text in zip(uncached_indices, all_vectors, uncached_texts):
+            for idx, vec, text in zip(uncached_indices, all_vectors, uncached_texts, strict=True):
                 results[idx] = vec
                 self._cache_put(text, vec)
 
         return results  # type: ignore
 
-    def _request_embeddings(self, texts: List[str]) -> List[List[float]]:
+    def _request_embeddings(self, texts: list[str]) -> list[list[float]]:
         """
         POST to the OpenAI-compatible /embeddings endpoint with retry.
 
@@ -203,7 +202,7 @@ class EmbeddingService:
             f"Embedding request failed after {self.max_retries} retries: {last_error}"
         )
 
-    def _cache_put(self, text: str, vector: List[float]) -> None:
+    def _cache_put(self, text: str, vector: list[float]) -> None:
         """Add to cache, evicting oldest entries if full."""
         if len(self._cache) >= self._cache_max_size:
             # Remove ~10% of oldest entries

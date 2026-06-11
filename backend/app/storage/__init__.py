@@ -8,9 +8,9 @@ Local graph storage replacing Zep Cloud:
 - Hybrid search (vector + keyword)
 """
 
+from .embedding_service import EmbeddingError, EmbeddingService
 from .graph_storage import GraphStorage
 from .neo4j_storage import Neo4jStorage
-from .embedding_service import EmbeddingService, EmbeddingError
 from .ner_extractor import NERExtractor
 from .search_service import SearchService
 
