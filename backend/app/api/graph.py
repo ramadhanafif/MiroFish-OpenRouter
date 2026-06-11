@@ -17,6 +17,7 @@ from ..services.ontology_generator import OntologyGenerator
 from ..services.text_processor import TextProcessor
 from ..utils.file_parser import FileParser
 from ..utils.logger import get_logger
+from ..utils.notifier import notify
 from . import graph_bp
 
 # Get logger
@@ -462,6 +463,9 @@ def build_graph():
                 node_count = graph_data.get("node_count", 0)
                 edge_count = graph_data.get("edge_count", 0)
                 build_logger.info(f"[{task_id}] Graph build completed: graph_id={graph_id}, nodes={node_count}, edges={edge_count}")
+                notify("Graph build complete",
+                       f"{node_count} nodes, {edge_count} edges. Ready for environment setup.",
+                       tags="white_check_mark")
 
                 # Complete
                 task_manager.update_task(
@@ -481,6 +485,7 @@ def build_graph():
             except Exception as e:
                 # Update project status to failed
                 build_logger.error(f"[{task_id}] Graph build failed: {str(e)}")
+                notify("Graph build failed", str(e)[:500], priority="high", tags="x")
                 build_logger.debug(traceback.format_exc())
 
                 project.status = ProjectStatus.FAILED

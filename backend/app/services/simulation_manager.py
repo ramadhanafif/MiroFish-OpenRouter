@@ -13,6 +13,7 @@ from enum import Enum
 from typing import TYPE_CHECKING, Any
 
 from ..utils.logger import get_logger
+from ..utils.notifier import notify
 from .entity_reader import EntityReader
 from .oasis_profile_generator import OasisProfileGenerator
 from .simulation_config_generator import SimulationConfigGenerator
@@ -448,6 +449,9 @@ class SimulationManager:
 
             logger.info(f"Simulation preparation completed: {simulation_id}, "
                        f"entities={state.entities_count}, profiles={state.profiles_count}")
+            notify("Environment setup complete",
+                   f"{state.profiles_count} agent personas ready. Simulation can start.",
+                   tags="white_check_mark")
 
             return state
 

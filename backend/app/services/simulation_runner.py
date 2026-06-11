@@ -18,6 +18,7 @@ from queue import Queue
 from typing import TYPE_CHECKING, Any
 
 from ..utils.logger import get_logger
+from ..utils.notifier import notify
 from .graph_memory_updater import GraphMemoryManager
 from .simulation_ipc import SimulationIPCClient
 
@@ -527,6 +528,9 @@ class SimulationRunner:
                 state.runner_status = RunnerStatus.COMPLETED
                 state.completed_at = datetime.now().isoformat()
                 logger.info(f"Simulation completed: {simulation_id}")
+                notify("Simulation finished",
+                       f"Simulation {simulation_id} completed all rounds. Ready for report generation.",
+                       tags="white_check_mark")
             else:
                 state.runner_status = RunnerStatus.FAILED
                 # Read error info from main log file
@@ -540,6 +544,9 @@ class SimulationRunner:
                     pass
                 state.error = f"Process exit code: {exit_code}, error: {error_info}"
                 logger.error(f"Simulation failed: {simulation_id}, error={state.error}")
+                notify("Simulation failed",
+                       f"Simulation {simulation_id} exited with an error. Check the logs.",
+                       priority="high", tags="x")
 
             state.twitter_running = False
             state.reddit_running = False

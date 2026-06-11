@@ -21,6 +21,7 @@ from typing import Any
 from ..config import Config
 from ..utils.llm_client import LLMClient
 from ..utils.logger import get_logger
+from ..utils.notifier import notify
 from .graph_tools import GraphToolsService
 
 logger = get_logger('mirofish.report_agent')
@@ -1736,6 +1737,9 @@ class ReportAgent:
                 progress_callback("completed", 100, "Report generation complete")
 
             logger.info(f"Report generation complete: {report_id}")
+            notify("Report ready",
+                   f"Report {report_id} has been generated.",
+                   tags="page_facing_up,white_check_mark")
 
             # Closeconsoleloglogger
             if self.console_logger:
@@ -1746,6 +1750,7 @@ class ReportAgent:
 
         except Exception as e:
             logger.error(f"Report generation failed: {str(e)}")
+            notify("Report generation failed", str(e)[:500], priority="high", tags="x")
             report.status = ReportStatus.FAILED
             report.error = str(e)
 
