@@ -123,7 +123,7 @@
               </div>
               <div :style="s.inputWrapper">
                 <textarea v-model="formData.simulationRequirement" :style="s.codeInput" placeholder="// Describe your simulation or prediction goal in natural language" rows="6" :disabled="loading"></textarea>
-                <div :style="s.modelBadge">Engine: Ollama + Neo4j (local)</div>
+                <div :style="s.modelBadge">Engine: OpenRouter + Neo4j</div>
               </div>
             </div>
 
@@ -219,7 +219,7 @@ const s = reactive({
 
 const steps = [
   { num: '01', title: 'Graph Build', desc: 'Extract reality seeds from your document, build knowledge graph with Neo4j + GraphRAG' },
-  { num: '02', title: 'Env Setup', desc: 'Generate agent personas, configure simulation parameters via local Ollama LLM' },
+  { num: '02', title: 'Env Setup', desc: 'Generate agent personas, configure simulation parameters via LLM' },
   { num: '03', title: 'Simulation', desc: 'Run multi-agent simulation locally with dynamic memory updates and emergent behavior' },
   { num: '04', title: 'Report', desc: 'ReportAgent analyzes the simulation results and generates a detailed prediction report' },
   { num: '05', title: 'Interaction', desc: 'Chat with any agent from the simulated world or discuss findings with ReportAgent' },

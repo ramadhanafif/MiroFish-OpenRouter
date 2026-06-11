@@ -4,9 +4,9 @@
 
 # MiroFish-Offline
 
-**Fully local fork of [MiroFish](https://github.com/666ghj/MiroFish) — no cloud APIs required. English UI.**
+**Self-hosted fork of [MiroFish](https://github.com/666ghj/MiroFish) — bring your own OpenAI-compatible API. English UI.**
 
-*A multi-agent swarm intelligence engine that simulates public opinion, market sentiment, and social dynamics. Entirely on your hardware.*
+*A multi-agent swarm intelligence engine that simulates public opinion, market sentiment, and social dynamics. On your hardware, with the LLM provider of your choice.*
 
 [![GitHub Stars](https://img.shields.io/github/stars/nikmcfly/MiroFish-Offline?style=flat-square&color=DAA520)](https://github.com/nikmcfly/MiroFish-Offline/stargazers)
 [![GitHub Forks](https://img.shields.io/github/forks/nikmcfly/MiroFish-Offline?style=flat-square)](https://github.com/nikmcfly/MiroFish-Offline/network)
@@ -19,15 +19,15 @@
 
 MiroFish is a multi-agent simulation engine: upload any document (press release, policy draft, financial report), and it generates hundreds of AI agents with unique personalities that simulate the public reaction on social media. Posts, arguments, opinion shifts — hour by hour.
 
-The [original MiroFish](https://github.com/666ghj/MiroFish) was built for the Chinese market (Chinese UI, Zep Cloud for knowledge graphs, DashScope API). This fork makes it **fully local and fully English**:
+The [original MiroFish](https://github.com/666ghj/MiroFish) was built for the Chinese market (Chinese UI, Zep Cloud for knowledge graphs, DashScope API). This fork keeps the data layer self-hosted and works with any OpenAI-compatible LLM API:
 
 | Original MiroFish | MiroFish-Offline |
 |---|---|
 | Chinese UI | **English UI** (1,000+ strings translated) |
-| Zep Cloud (graph memory) | **Neo4j Community Edition 5.15** |
-| DashScope / OpenAI API (LLM) | **Ollama** (qwen2.5, llama3, etc.) |
-| Zep Cloud embeddings | **nomic-embed-text** via Ollama |
-| Cloud API keys required | **Zero cloud dependencies** |
+| Zep Cloud (graph memory) | **Neo4j Community Edition** (self-hosted) |
+| DashScope API (LLM) | **Any OpenAI-compatible API** (OpenRouter by default) |
+| Zep Cloud embeddings | **OpenAI-compatible embeddings** (configurable dimension) |
+| Locked to one provider | **Swap models with one line of config** |
 
 ## Workflow
 
@@ -47,8 +47,9 @@ The [original MiroFish](https://github.com/666ghj/MiroFish) was built for the Ch
 
 ### Prerequisites
 
+- An [OpenRouter](https://openrouter.ai/keys) API key (or any OpenAI-compatible endpoint)
 - Docker & Docker Compose (recommended), **or**
-- Python 3.11+, Node.js 18+, Neo4j 5.15+, Ollama
+- Python 3.11+, Node.js 18+, Neo4j 5.18+
 
 ### Option A: Docker (easiest)
 
@@ -56,13 +57,8 @@ The [original MiroFish](https://github.com/666ghj/MiroFish) was built for the Ch
 git clone https://github.com/nikmcfly/MiroFish-Offline.git
 cd MiroFish-Offline
 cp .env.example .env
-
-# Start all services (Neo4j, Ollama, MiroFish)
+# Edit .env: paste your OpenRouter API key into LLM_API_KEY and OPENAI_API_KEY
 docker compose up -d
-
-# Pull the required models into Ollama
-docker exec mirofish-ollama ollama pull qwen2.5:32b
-docker exec mirofish-ollama ollama pull nomic-embed-text
 ```
 
 Open `http://localhost:3000` — that's it.
@@ -75,29 +71,21 @@ Open `http://localhost:3000` — that's it.
 docker run -d --name neo4j \
   -p 7474:7474 -p 7687:7687 \
   -e NEO4J_AUTH=neo4j/mirofish \
-  neo4j:5.15-community
+  neo4j:5.18-community
 ```
 
-**2. Start Ollama & pull models**
-
-```bash
-ollama serve &
-ollama pull qwen2.5:32b      # LLM (or qwen2.5:14b for less VRAM)
-ollama pull nomic-embed-text  # Embeddings (768d)
-```
-
-**3. Configure & run backend**
+**2. Configure & run backend**
 
 ```bash
 cp .env.example .env
-# Edit .env if your Neo4j/Ollama are on non-default ports
+# Edit .env: paste your OpenRouter API key
 
 cd backend
-pip install -r requirements.txt
-python run.py
+uv sync
+uv run python run.py
 ```
 
-**4. Run frontend**
+**3. Run frontend**
 
 ```bash
 cd frontend
@@ -112,22 +100,25 @@ Open `http://localhost:3000`.
 All settings are in `.env` (copy from `.env.example`):
 
 ```bash
-# LLM — points to local Ollama (OpenAI-compatible API)
-LLM_API_KEY=ollama
-LLM_BASE_URL=http://localhost:11434/v1
-LLM_MODEL_NAME=qwen2.5:32b
+# LLM — any OpenAI-compatible API (OpenRouter by default)
+LLM_API_KEY=sk-or-v1-...
+LLM_BASE_URL=https://openrouter.ai/api/v1
+LLM_MODEL_NAME=deepseek/deepseek-v4-flash
 
 # Neo4j
 NEO4J_URI=bolt://localhost:7687
 NEO4J_USER=neo4j
 NEO4J_PASSWORD=mirofish
 
-# Embeddings
-EMBEDDING_MODEL=nomic-embed-text
-EMBEDDING_BASE_URL=http://localhost:11434
+# Embeddings — OpenAI-compatible /embeddings endpoint
+EMBEDDING_BASE_URL=https://openrouter.ai/api/v1
+EMBEDDING_MODEL=openai/text-embedding-3-small
+EMBEDDING_DIMENSIONS=1536
 ```
 
-Works with any OpenAI-compatible API — swap Ollama for Claude, GPT, or any other provider by changing `LLM_BASE_URL` and `LLM_API_KEY`.
+`EMBEDDING_DIMENSIONS` must match the chosen embedding model's vector size. If you change it, the Neo4j vector indexes are dropped and recreated automatically on next startup (existing graphs must be re-built to re-embed).
+
+Works with any OpenAI-compatible API — point `LLM_BASE_URL` at OpenAI, a local vLLM/Ollama server, or any other provider.
 
 ## Architecture
 
@@ -151,8 +142,8 @@ This fork introduces a clean abstraction layer between the application and the g
 │    ┌─────────▼─────────┐                │
 │    │   Neo4jStorage     │                │
 │    │  ┌───────────────┐ │                │
-│    │  │ EmbeddingService│ ← Ollama       │
-│    │  │ NERExtractor   │ ← Ollama LLM   │
+│    │  │ EmbeddingService│ ← OpenAI-compat │
+│    │  │ NERExtractor   │ ← LLM API       │
 │    │  │ SearchService  │ ← Hybrid search │
 │    │  └───────────────┘ │                │
 │    └───────────────────┘                │
@@ -160,7 +151,7 @@ This fork introduces a clean abstraction layer between the application and the g
                │
         ┌──────▼──────┐
         │  Neo4j CE   │
-        │  5.15       │
+        │  5.18       │
         └─────────────┘
 ```
 
@@ -169,19 +160,9 @@ This fork introduces a clean abstraction layer between the application and the g
 - `GraphStorage` is an abstract interface — swap Neo4j for any other graph DB by implementing one class
 - Dependency injection via Flask `app.extensions` — no global singletons
 - Hybrid search: 0.7 × vector similarity + 0.3 × BM25 keyword search
-- Synchronous NER/RE extraction via local LLM (replaces Zep's async episodes)
+- Synchronous NER/RE extraction via LLM (replaces Zep's async episodes)
+- Configurable embedding dimension with automatic vector index migration
 - All original dataclasses and LLM tools (InsightForge, Panorama, Agent Interviews) preserved
-
-## Hardware Requirements
-
-| Component | Minimum | Recommended |
-|---|---|---|
-| RAM | 16 GB | 32 GB |
-| VRAM (GPU) | 10 GB (14b model) | 24 GB (32b model) |
-| Disk | 20 GB | 50 GB |
-| CPU | 4 cores | 8+ cores |
-
-CPU-only mode works but is significantly slower for LLM inference. For lighter setups, use `qwen2.5:14b` or `qwen2.5:7b`.
 
 ## Use Cases
 
@@ -199,7 +180,7 @@ AGPL-3.0 — same as the original MiroFish project. See [LICENSE](./LICENSE).
 This is a modified fork of [MiroFish](https://github.com/666ghj/MiroFish) by [666ghj](https://github.com/666ghj), originally supported by [Shanda Group](https://www.shanda.com/). The simulation engine is powered by [OASIS](https://github.com/camel-ai/oasis) from the CAMEL-AI team.
 
 **Modifications in this fork:**
-- Backend migrated from Zep Cloud to local Neo4j CE 5.15 + Ollama
+- Backend migrated from Zep Cloud to self-hosted Neo4j CE + any OpenAI-compatible LLM/embedding API
 - Entire frontend translated from Chinese to English (20 files, 1,000+ strings)
 - All Zep references replaced with Neo4j across the UI
 - Rebranded to MiroFish Offline

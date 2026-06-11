@@ -1,11 +1,9 @@
 """
 LLM Client Wrapper
-Unified OpenAI format API calls
-Supports Ollama num_ctx parameter to prevent prompt truncation
+Unified OpenAI format API calls (OpenRouter, OpenAI, or any compatible server)
 """
 
 import json
-import os
 import re
 from typing import Optional, Dict, Any, List
 from openai import OpenAI
@@ -36,14 +34,6 @@ class LLMClient:
             timeout=timeout,
         )
 
-        # Ollama context window size — prevents prompt truncation.
-        # Read from env OLLAMA_NUM_CTX, default 8192 (Ollama default is only 2048).
-        self._num_ctx = int(os.environ.get('OLLAMA_NUM_CTX', '8192'))
-
-    def _is_ollama(self) -> bool:
-        """Check if we're talking to an Ollama server."""
-        return '11434' in (self.base_url or '')
-
     def chat(
         self,
         messages: List[Dict[str, str]],
@@ -73,14 +63,11 @@ class LLMClient:
         if response_format:
             kwargs["response_format"] = response_format
 
-        # For Ollama: pass num_ctx via extra_body to prevent prompt truncation
-        if self._is_ollama() and self._num_ctx:
-            kwargs["extra_body"] = {
-                "options": {"num_ctx": self._num_ctx}
-            }
-
         response = self.client.chat.completions.create(**kwargs)
         content = response.choices[0].message.content
+        if content is None:
+            finish_reason = response.choices[0].finish_reason
+            raise ValueError(f"LLM returned empty content (finish_reason={finish_reason})")
         # Some models (like MiniMax M2.5) include <think>thinking content in response, need to remove
         content = re.sub(r'<think>[\s\S]*?</think>', '', content).strip()
         return content
@@ -117,4 +104,16 @@ class LLMClient:
         try:
             return json.loads(cleaned_response)
         except json.JSONDecodeError:
-            raise ValueError(f"Invalid JSON format from LLM: {cleaned_response}")
+            pass
+
+        # Some providers ignore response_format and wrap JSON in prose —
+        # fall back to the outermost {...} block
+        start = cleaned_response.find('{')
+        end = cleaned_response.rfind('}')
+        if start != -1 and end > start:
+            try:
+                return json.loads(cleaned_response[start:end + 1])
+            except json.JSONDecodeError:
+                pass
+
+        raise ValueError(f"Invalid JSON format from LLM: {cleaned_response[:2000]}")

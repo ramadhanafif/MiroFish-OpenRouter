@@ -63,12 +63,45 @@ class Neo4jStorage(GraphStorage):
 
     def _ensure_schema(self):
         """Create indexes and constraints if they don't exist."""
+        dimensions = Config.EMBEDDING_DIMENSIONS
         with self._driver.session() as session:
-            for query in neo4j_schema.ALL_SCHEMA_QUERIES:
+            self._drop_mismatched_vector_indexes(session, dimensions)
+            for query in neo4j_schema.all_schema_queries(dimensions):
                 try:
                     session.run(query)
                 except Exception as e:
                     logger.warning(f"Schema query warning (may already exist): {e}")
+
+    def _drop_mismatched_vector_indexes(self, session, dimensions: int):
+        """
+        Drop vector indexes whose dimension doesn't match EMBEDDING_DIMENSIONS
+        (e.g. after switching embedding models) so they get recreated.
+        Existing vectors of the old dimension are not migrated — they simply
+        won't be indexed; re-build the graph to re-embed.
+        """
+        managed = {
+            neo4j_schema.ENTITY_VECTOR_INDEX_NAME,
+            neo4j_schema.RELATION_VECTOR_INDEX_NAME,
+        }
+        try:
+            result = session.run(
+                "SHOW VECTOR INDEXES YIELD name, options RETURN name, options"
+            )
+            for record in result:
+                name = record["name"]
+                if name not in managed:
+                    continue
+                index_config = (record["options"] or {}).get("indexConfig", {})
+                existing_dim = index_config.get("vector.dimensions")
+                if existing_dim is not None and int(existing_dim) != dimensions:
+                    logger.warning(
+                        f"Vector index '{name}' has dimension {existing_dim}, "
+                        f"but EMBEDDING_DIMENSIONS={dimensions} — dropping and recreating. "
+                        f"Existing graphs must be re-built to re-embed."
+                    )
+                    session.run(f"DROP INDEX {name}")
+        except Exception as e:
+            logger.warning(f"Vector index dimension check failed: {e}")
 
     # ----------------------------------------------------------------
     # Retry wrapper
