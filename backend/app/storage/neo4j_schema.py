@@ -1,5 +1,5 @@
 """
-Neo4j Schema — Cypher queries for index creation and schema management.
+Neo4j Schema: Cypher queries for index creation and schema management.
 
 Called by Neo4jStorage._ensure_schema() to set up vector + fulltext indexes.
 Vector index dimensions follow Config.EMBEDDING_DIMENSIONS; if an existing

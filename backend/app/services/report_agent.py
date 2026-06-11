@@ -1495,7 +1495,7 @@ class ReportAgent:
 
             # Directly adopt this content as final answer, no more waiting
             # directlyconvertthis contentas finalanswer, no more waiting
-            logger.info(f"Section {section.title} did not detectto 'Final Answer:' prefix, directlyadoptLLM outputas finalcontent（Tool call: {tool_calls_count}times)")
+            logger.info(f"Section {section.title}: no 'Final Answer:' prefix detected, using the raw LLM output as the final content (tool calls: {tool_calls_count})")
             final_answer = response.strip()
 
             if self.report_logger:
@@ -1508,7 +1508,7 @@ class ReportAgent:
             return final_answer
         
         # Reachedmaximum iterations, forcegeneratecontent
-        logger.warning(f"Section {section.title} reachedmaximumiterationscount，Forcegenerate")
+        logger.warning(f"Section {section.title} reached the maximum iteration count, forcing generation")
         messages.append({"role": "user", "content": REACT_FORCE_FINAL_MSG})
         
         response = self.llm.chat(
@@ -1520,7 +1520,7 @@ class ReportAgent:
         # Check forceconclusion when LLM return is None
         if response is None:
             final_answer = f"(This section generation failed: LLM returned empty response, please retry later)"
-            final_answer = f"(ThisSectiongeneratefailed: LLM returnedemptyresponse, pleaselaterretry)"
+            final_answer = f"(Section generation failed: the LLM returned an empty response. Please retry later)"
         elif "Final Answer:" in response:
             final_answer = response.split("Final Answer:")[-1].strip()
         else:

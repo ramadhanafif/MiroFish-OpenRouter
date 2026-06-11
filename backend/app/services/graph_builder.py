@@ -131,7 +131,7 @@ class GraphBuilderService:
                 message=f"Text split into {total_chunks} chunks"
             )
 
-            # 4. Send data in batches (NER + embedding + Neo4j insert — synchronous)
+            # 4. Send data in batches (NER + embedding + Neo4j insert, synchronous)
             episode_uuids = self.add_text_batches(
                 graph_id, chunks, batch_size,
                 lambda msg, prog: self.task_manager.update_task(
@@ -141,7 +141,7 @@ class GraphBuilderService:
                 )
             )
 
-            # 5. Wait for processing (no-op for Neo4j — already synchronous)
+            # 5. Wait for processing (no-op for Neo4j, already synchronous)
             self.storage.wait_for_processing(episode_uuids)
 
             self.task_manager.update_task(

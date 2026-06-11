@@ -1,5 +1,5 @@
 """
-Neo4jStorage — Neo4j Community Edition implementation of GraphStorage.
+Neo4jStorage: Neo4j Community Edition implementation of GraphStorage.
 
 Replaces all Zep Cloud API calls with local Neo4j Cypher queries.
 Includes: CRUD, NER/RE-based text ingestion, hybrid search, retry logic.
@@ -76,7 +76,7 @@ class Neo4jStorage(GraphStorage):
         """
         Drop vector indexes whose dimension doesn't match EMBEDDING_DIMENSIONS
         (e.g. after switching embedding models) so they get recreated.
-        Existing vectors of the old dimension are not migrated — they simply
+        Existing vectors of the old dimension are not migrated; they simply
         won't be indexed; re-build the graph to re-embed.
         """
         managed = {
@@ -96,7 +96,7 @@ class Neo4jStorage(GraphStorage):
                 if existing_dim is not None and int(existing_dim) != dimensions:
                     logger.warning(
                         f"Vector index '{name}' has dimension {existing_dim}, "
-                        f"but EMBEDDING_DIMENSIONS={dimensions} — dropping and recreating. "
+                        f"but EMBEDDING_DIMENSIONS={dimensions}. Dropping and recreating. "
                         f"Existing graphs must be re-built to re-embed."
                     )
                     session.run(f"DROP INDEX {name}")
@@ -413,7 +413,7 @@ class Neo4jStorage(GraphStorage):
         progress_callback: Optional[Callable] = None,
         timeout: int = 600,
     ) -> None:
-        """No-op — processing is synchronous in Neo4j."""
+        """No-op; processing is synchronous in Neo4j."""
         if progress_callback:
             progress_callback(1.0)
 
@@ -453,7 +453,7 @@ class Neo4jStorage(GraphStorage):
             return self._call_with_retry(session.execute_read, _read)
 
     def get_node_edges(self, node_uuid: str) -> List[Dict[str, Any]]:
-        """O(1) Cypher — NOT full scan + filter like the old Zep code."""
+        """O(1) Cypher, NOT a full scan + filter like the old Zep code."""
         def _read(tx):
             result = tx.run(
                 """
@@ -472,7 +472,7 @@ class Neo4jStorage(GraphStorage):
 
     def get_nodes_by_label(self, graph_id: str, label: str) -> List[Dict[str, Any]]:
         def _read(tx):
-            # Dynamic label in query (safe — label comes from ontology, not user input)
+            # Dynamic label in query (safe: label comes from ontology, not user input)
             query = f"""
                 MATCH (n:Entity:`{label}` {{graph_id: $gid}})
                 RETURN n, labels(n) AS labels
@@ -517,7 +517,7 @@ class Neo4jStorage(GraphStorage):
         scope: str = "edges",
     ):
         """
-        Hybrid search — returns results matching the scope.
+        Hybrid search; returns results matching the scope.
 
         Returns a dict with 'edges' and/or 'nodes' lists
         (callers like zep_tools will wrap into SearchResult).

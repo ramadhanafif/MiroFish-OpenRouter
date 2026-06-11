@@ -1,5 +1,5 @@
 """
-GraphStorage — abstract interface for graph storage backends.
+GraphStorage: abstract interface for graph storage backends.
 
 All Zep Cloud calls are replaced by this abstraction.
 Current implementation: Neo4jStorage (neo4j_storage.py).

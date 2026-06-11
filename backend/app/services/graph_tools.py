@@ -2,7 +2,7 @@
 Graph Retrieval Tools Service
 Encapsulates graph search, node retrieval, edge queries, and other tools for use by Report Agent.
 
-Replaces zep_tools.py — all Zep Cloud calls replaced by GraphStorage.
+Replaces zep_tools.py; all Zep Cloud calls replaced by GraphStorage.
 
 Core Retrieval Tools (Optimized):
 1. InsightForge (Deep Insight Retrieval) - Most powerful hybrid search, automatically generates sub-questions and multi-dimensional retrieval
@@ -85,7 +85,7 @@ class EdgeInfo:
     target_node_uuid: str
     source_node_name: Optional[str] = None
     target_node_name: Optional[str] = None
-    # Temporal information (may be absent in Neo4j — kept for interface compat)
+    # Temporal information (may be absent in Neo4j; kept for interface compat)
     created_at: Optional[str] = None
     valid_at: Optional[str] = None
     invalid_at: Optional[str] = None
@@ -1092,7 +1092,7 @@ Return the sub-questions as a JSON list."""
         [InterviewAgents - Deep Interview]
 
         Call the real OASIS interview API to interview Agents running in the simulation.
-        This method does NOT use GraphStorage — it calls SimulationRunner
+        This method does NOT use GraphStorage; it calls SimulationRunner
         and reads agent profiles from disk.
         """
         from .simulation_runner import SimulationRunner

@@ -1,4 +1,4 @@
-/* Home.css — extracted from Home.vue to bypass Vite SFC style bug */
+/* Home.css: extracted from Home.vue to bypass a Vite SFC style bug */
 
 .home-container {
   min-height: 100vh;

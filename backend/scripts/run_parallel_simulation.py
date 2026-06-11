@@ -1229,7 +1229,7 @@ async def run_twitter_simulation(
         # Check if received exit signal
         if _shutdown_event and _shutdown_event.is_set():
             if main_logger:
-                main_logger.info(f"Received exit signal，at round {round_num + 1} stop simulation")
+                main_logger.info(f"Received exit signal, stopping simulation at round {round_num + 1}")
             break
         
         simulated_minutes = round_num * minutes_per_round
@@ -1428,7 +1428,7 @@ async def run_reddit_simulation(
         # Check if received exit signal
         if _shutdown_event and _shutdown_event.is_set():
             if main_logger:
-                main_logger.info(f"Received exit signal，at round {round_num + 1} stop simulation")
+                main_logger.info(f"Received exit signal, stopping simulation at round {round_num + 1}")
             break
         
         simulated_minutes = round_num * minutes_per_round

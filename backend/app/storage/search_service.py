@@ -1,5 +1,5 @@
 """
-SearchService — hybrid search (vector + keyword) over Neo4j graph data.
+SearchService: hybrid search (vector + keyword) over Neo4j graph data.
 
 Replaces Zep Cloud's built-in search with reranker.
 Scoring: 0.7 * vector_score + 0.3 * keyword_score (BM25 via fulltext index).

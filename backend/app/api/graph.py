@@ -26,7 +26,7 @@ def _get_storage():
     """Get Neo4jStorage from Flask app extensions."""
     storage = current_app.extensions.get('neo4j_storage')
     if not storage:
-        raise ValueError("GraphStorage not initialized — check Neo4j connection")
+        raise ValueError("GraphStorage is not initialized. Check the Neo4j connection")
     return storage
 
 

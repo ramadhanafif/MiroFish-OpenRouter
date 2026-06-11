@@ -2,7 +2,7 @@
 Entity reading and filtering service.
 Reads nodes from Neo4j graph, filters out meaningful entity type nodes.
 
-Replaces zep_entity_reader.py — all Zep Cloud calls replaced by GraphStorage.
+Replaces zep_entity_reader.py; all Zep Cloud calls replaced by GraphStorage.
 """
 
 from typing import Dict, Any, List, Optional, Set

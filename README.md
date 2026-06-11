@@ -4,7 +4,7 @@
 
 # MiroFish-Offline
 
-**Self-hosted fork of [MiroFish](https://github.com/666ghj/MiroFish) — bring your own OpenAI-compatible API.**
+**Self-hosted fork of [MiroFish](https://github.com/666ghj/MiroFish). Bring your own OpenAI-compatible API.**
 
 [![GitHub Stars](https://img.shields.io/github/stars/nikmcfly/MiroFish-Offline?style=flat-square&color=DAA520)](https://github.com/nikmcfly/MiroFish-Offline/stargazers)
 [![GitHub Forks](https://img.shields.io/github/forks/nikmcfly/MiroFish-Offline?style=flat-square)](https://github.com/nikmcfly/MiroFish-Offline/network)
@@ -15,28 +15,28 @@
 
 ## What is this?
 
-Upload a document (press release, policy draft, financial report) and MiroFish builds a knowledge graph from it, generates hundreds of AI agent personas, and simulates their reaction on social media — posts, arguments, opinion shifts — then writes an analysis report.
+Upload a document (press release, policy draft, financial report) and MiroFish builds a knowledge graph from it, generates hundreds of AI agent personas, and simulates their reaction on social media: posts, arguments, and opinion shifts. It then writes an analysis report.
 
 The [original MiroFish](https://github.com/666ghj/MiroFish) targets the Chinese market and depends on cloud services (Zep Cloud, DashScope). [MiroFish-Offline](https://github.com/nikmcfly/MiroFish-Offline) made it self-hosted and English; this fork builds on it to make it provider-agnostic.
 
 ## What this fork brings
 
-- **Any OpenAI-compatible API** — chat goes through a standard `/chat/completions` endpoint: OpenRouter, OpenAI, vLLM, whatever you run. Swap models with one line in `.env`. No DashScope lock-in.
-- **OpenRouter embeddings** — embeddings use the OpenAI-compatible `/embeddings` endpoint too (default: `openai/text-embedding-3-small`, 1536 dims). Embedding dimension is configurable; Neo4j vector indexes migrate automatically when it changes.
-- **Lighter Docker image** — CPU-only torch instead of the default CUDA build: a ~3.8 GB image instead of multi-GB nvidia wheel downloads you don't need without a GPU.
+- **Any OpenAI-compatible API.** Chat goes through a standard `/chat/completions` endpoint: OpenRouter, OpenAI, vLLM, whatever you run. Swap models with one line in `.env`. No DashScope lock-in.
+- **OpenRouter embeddings.** Embeddings also use the OpenAI-compatible `/embeddings` endpoint (default: `openai/text-embedding-3-small`, 1536 dims). The embedding dimension is configurable, and the Neo4j vector indexes migrate automatically when it changes.
+- **Lighter Docker image.** CPU-only torch instead of the default CUDA build keeps the image around 3.8 GB and skips the multi-GB nvidia wheel downloads you don't need without a GPU.
 
 Plus: knowledge graphs on self-hosted **Neo4j Community Edition** instead of Zep Cloud, an **English UI** (1,000+ strings translated), and a frontend reachable from any host on your network, not just localhost.
 
 ## Workflow
 
-1. **Graph Build** — extract entities and relationships from your document into a Neo4j knowledge graph
-2. **Env Setup** — generate hundreds of agent personas with unique personality, bias, and influence
-3. **Simulation** — agents post, reply, argue, and shift opinions on a simulated social platform
-4. **Report** — a ReportAgent interviews agents, searches the graph, and writes a structured analysis
-5. **Interaction** — chat with any agent from the simulated world, memory and personality intact
+1. **Graph Build**: extracts entities and relationships from your document into a Neo4j knowledge graph
+2. **Env Setup**: generates hundreds of agent personas with unique personality, bias, and influence
+3. **Simulation**: agents post, reply, argue, and shift opinions on a simulated social platform
+4. **Report**: a ReportAgent interviews agents, searches the graph, and writes a structured analysis
+5. **Interaction**: chat with any agent from the simulated world, memory and personality intact
 
 <div align="center">
-<img src="./static/image/mirofish-offline-screenshot.jpg" alt="MiroFish Offline — English UI" width="100%"/>
+<img src="./static/image/mirofish-offline-screenshot.jpg" alt="MiroFish Offline English UI" width="100%"/>
 </div>
 
 ## Quick Start
@@ -76,7 +76,7 @@ cd frontend && npm install && npm run dev
 Everything lives in `.env` (copy from `.env.example`):
 
 ```bash
-# LLM — any OpenAI-compatible API (OpenRouter by default)
+# LLM: any OpenAI-compatible API (OpenRouter by default)
 LLM_API_KEY=sk-or-v1-...
 LLM_BASE_URL=https://openrouter.ai/api/v1
 LLM_MODEL_NAME=deepseek/deepseek-v4-flash
@@ -86,7 +86,7 @@ NEO4J_URI=bolt://localhost:7687
 NEO4J_USER=neo4j
 NEO4J_PASSWORD=mirofish
 
-# Embeddings — OpenAI-compatible /embeddings endpoint
+# Embeddings: OpenAI-compatible /embeddings endpoint
 EMBEDDING_BASE_URL=https://openrouter.ai/api/v1
 EMBEDDING_MODEL=openai/text-embedding-3-small
 EMBEDDING_DIMENSIONS=1536
@@ -96,8 +96,8 @@ EMBEDDING_DIMENSIONS=1536
 
 ## Architecture notes
 
-- `GraphStorage` is an abstract interface — swap Neo4j for another graph DB by implementing one class
-- Dependency injection via Flask `app.extensions` — no global singletons
+- `GraphStorage` is an abstract interface; swapping Neo4j for another graph DB means implementing one class
+- Dependency injection via Flask `app.extensions`, with no global singletons
 - Hybrid search: 0.7 × vector similarity + 0.3 × BM25 keyword search
 - Synchronous NER/RE extraction via LLM (replaces Zep's async episodes)
 - Simulation engine: [OASIS](https://github.com/camel-ai/oasis) by CAMEL-AI, run as a separate OS process

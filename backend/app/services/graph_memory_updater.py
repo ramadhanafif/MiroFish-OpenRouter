@@ -1,7 +1,7 @@
 """
 Graph memory update service that processes agent activities and updates them to Neo4j Graph.
 
-Replaces zep_graph_memory_updater.py — Zep client replaced by GraphStorage.
+Replaces zep_graph_memory_updater.py; Zep client replaced by GraphStorage.
 """
 
 import os
@@ -383,7 +383,7 @@ class GraphMemoryManager:
     Manages graph memory updaters for multiple simulations.
 
     Each simulation can have its own independent updater instance.
-    NOTE: create_updater() requires a GraphStorage instance — must be passed in.
+    NOTE: create_updater() requires a GraphStorage instance; it must be passed in.
     """
 
     _updaters: Dict[str, GraphMemoryUpdater] = {}

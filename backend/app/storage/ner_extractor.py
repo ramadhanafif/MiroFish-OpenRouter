@@ -1,5 +1,5 @@
 """
-NER/RE Extractor — entity and relation extraction via local LLM
+NER/RE Extractor: entity and relation extraction via the LLM
 
 Replaces Zep Cloud's built-in NER/RE pipeline.
 Uses LLMClient.chat_json() with a structured prompt to extract
@@ -26,7 +26,7 @@ RULES:
 3. Each entity must have: name, type (from ontology), and optional attributes.
 4. Each relation must have: source entity name, target entity name, type (from ontology), and a fact sentence describing the relationship.
 5. If no entities or relations are found, return empty lists.
-6. Be precise — only extract what is explicitly stated or strongly implied in the text.
+6. Be precise: only extract what is explicitly stated or strongly implied in the text.
 
 Return ONLY valid JSON in this exact format:
 {{
@@ -90,7 +90,7 @@ class NERExtractor:
             except ValueError as e:
                 last_error = e
                 logger.warning(
-                    f"NER extraction failed (attempt {attempt + 1}): invalid JSON — {e}"
+                    f"NER extraction failed (attempt {attempt + 1}): invalid JSON: {e}"
                 )
             except Exception as e:
                 last_error = e

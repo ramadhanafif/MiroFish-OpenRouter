@@ -106,7 +106,7 @@ class LLMClient:
         except json.JSONDecodeError:
             pass
 
-        # Some providers ignore response_format and wrap JSON in prose —
+        # Some providers ignore response_format and wrap JSON in prose,
         # fall back to the outermost {...} block
         start = cleaned_response.find('{')
         end = cleaned_response.rfind('}')

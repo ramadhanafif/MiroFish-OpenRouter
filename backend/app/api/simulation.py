@@ -323,7 +323,7 @@ def _check_simulation_prepared(simulation_id: str) -> tuple:
                 except Exception as e:
                     logger.warning(f"Failed to auto update status: {e}")
             
-            logger.info(f"Simulation {simulation_id} Detection result: HasPreparation complete (status={status}, config_generated={config_generated})")
+            logger.info(f"Simulation {simulation_id} check: preparation complete (status={status}, config_generated={config_generated})")
             return True, {
                 "status": status,
                 "entities_count": state_data.get("entities_count", 0),
@@ -335,7 +335,7 @@ def _check_simulation_prepared(simulation_id: str) -> tuple:
                 "existing_files": existing_files
             }
         else:
-            logger.warning(f"Simulation {simulation_id} Detection result: Has notPreparation complete (status={status}, config_generated={config_generated})")
+            logger.warning(f"Simulation {simulation_id} check: preparation not complete (status={status}, config_generated={config_generated})")
             return False, {
                 "reason": f"Status not in prepared list or config_generated is false: status={status}, config_generated={config_generated}",
                 "status": status,
@@ -427,7 +427,7 @@ def prepare_simulation():
                     "data": {
                         "simulation_id": simulation_id,
                         "status": "ready",
-                        "message": "Preparation already completed，No need to repeatGenerate",
+                        "message": "Preparation already completed, nothing to regenerate",
                         "already_prepared": True,
                         "prepare_info": prepare_info
                     }
@@ -461,7 +461,7 @@ def prepare_simulation():
         # ========== Get GraphStorage（Capture reference before background task starts） ==========
         storage = current_app.extensions.get('neo4j_storage')
         if not storage:
-            raise ValueError("GraphStorage not initialized — check Neo4j connection")
+            raise ValueError("GraphStorage is not initialized. Check the Neo4j connection")
 
         # ========== Synchronously get entity count（Before background task starts） ==========
         # This way frontend when callingprepareCan immediately getExpected total agents
@@ -479,7 +479,7 @@ def prepare_simulation():
             state.entity_types = list(filtered_preview.entity_types)
             logger.info(f"Expected entity count: {filtered_preview.filtered_count}, [type][model]: {filtered_preview.entity_types}")
         except Exception as e:
-            logger.warning(f"Synchronously get entity countFailed（Will retry in background task）: {e}")
+            logger.warning(f"Failed to fetch entity count synchronously (will retry in the background task): {e}")
             # Failure does not affect subsequent process，Background task will retry
         
         # Create async task
@@ -609,7 +609,7 @@ def prepare_simulation():
                 "simulation_id": simulation_id,
                 "task_id": task_id,
                 "status": "preparing",
-                "message": "Preparation task started，Please via /api/simulation/prepare/status Query progress",
+                "message": "Preparation task started. Poll /api/simulation/prepare/status for progress",
                 "already_prepared": False,
                 "expected_entities_count": state.entities_count,  # Expected number of entities to process
                 "entity_types": state.entity_types  # Entity type list
@@ -699,7 +699,7 @@ def get_prepare_status():
                 })
             return jsonify({
                 "success": False,
-                "error": "Please provide task_id Or simulation_id"
+                "error": "Please provide task_id or simulation_id"
             }), 400
         
         task_manager = TaskManager()
@@ -717,7 +717,7 @@ def get_prepare_status():
                             "task_id": task_id,
                             "status": "ready",
                             "progress": 100,
-                            "message": "Task complete（PrepareWork already exists）",
+                            "message": "Task complete (preparation already exists)",
                             "already_prepared": True,
                             "prepare_info": prepare_info
                         }
@@ -1009,7 +1009,7 @@ def get_simulation_profiles(simulation_id: str):
         }), 404
         
     except Exception as e:
-        logger.error(f"GetProfileFailed: {str(e)}")
+        logger.error(f"Failed to get profiles: {str(e)}")
         return jsonify({
             "success": False,
             "error": str(e),
@@ -1119,7 +1119,7 @@ def get_simulation_profiles_realtime(simulation_id: str):
         })
         
     except Exception as e:
-        logger.error(f"Real-time getProfileFailed: {str(e)}")
+        logger.error(f"Failed to get real-time profiles: {str(e)}")
         return jsonify({
             "success": False,
             "error": str(e),
@@ -1239,7 +1239,7 @@ def get_simulation_config_realtime(simulation_id: str):
         })
         
     except Exception as e:
-        logger.error(f"Real-time getConfigFailed: {str(e)}")
+        logger.error(f"Failed to get real-time config: {str(e)}")
         return jsonify({
             "success": False,
             "error": str(e),
@@ -1338,7 +1338,7 @@ def download_simulation_script(script_name: str):
         if script_name not in allowed_scripts:
             return jsonify({
                 "success": False,
-                "error": f"Unknown script: {script_name}，Optional: {allowed_scripts}"
+                "error": f"Unknown script: {script_name}. Allowed: {allowed_scripts}"
             }), 400
         
         script_path = os.path.join(scripts_dir, script_name)
@@ -1433,7 +1433,7 @@ def generate_profiles():
         })
         
     except Exception as e:
-        logger.error(f"GenerateProfileFailed: {str(e)}")
+        logger.error(f"Failed to generate profiles: {str(e)}")
         return jsonify({
             "success": False,
             "error": str(e),
@@ -1517,7 +1517,7 @@ def start_simulation():
         if platform not in ['twitter', 'reddit', 'parallel']:
             return jsonify({
                 "success": False,
-                "error": f"Invalid platform type: {platform}，Optional: twitter/reddit/parallel"
+                "error": f"Invalid platform type: {platform}. Allowed: twitter/reddit/parallel"
             }), 400
 
         # Check if simulation is ready
@@ -1546,7 +1546,7 @@ def start_simulation():
                         # Process is indeed running
                         if force:
                             # Force mode：Stop runningSimulation
-                            logger.info(f"Force mode：Stop runningSimulation {simulation_id}")
+                            logger.info(f"Force mode: stopping running simulation {simulation_id}")
                             try:
                                 SimulationRunner.stop_simulation(simulation_id)
                             except Exception as e:
@@ -1590,7 +1590,7 @@ def start_simulation():
             if not graph_id:
                 return jsonify({
                     "success": False,
-                    "error": "Enable knowledge graph memory update requires valid graph_id，Please ensure project graph built"
+                    "error": "Graph memory update requires a valid graph_id. Build the project graph first"
                 }), 400
             
             logger.info(f"Enable knowledge graph memory update: simulation_id={simulation_id}, graph_id={graph_id}")
@@ -2023,7 +2023,7 @@ def get_simulation_posts(simulation_id: str):
                     "platform": platform,
                     "count": 0,
                     "posts": [],
-                    "message": "Database does not exist，SimulationMay not have run yet"
+                    "message": "Database does not exist. The simulation may not have run yet"
                 }
             })
         
@@ -2221,14 +2221,14 @@ def interview_agent():
         if not prompt:
             return jsonify({
                 "success": False,
-                "error": "Please provide prompt（Interview question）"
+                "error": "Please provide a prompt (the interview question)"
             }), 400
         
         # VerifyplatformParameters
         if platform and platform not in ("twitter", "reddit"):
             return jsonify({
                 "success": False,
-                "error": "platform Parameter can only be 'twitter' Or 'reddit'"
+                "error": "platform must be 'twitter' or 'reddit'"
             }), 400
         
         # Check environment status
@@ -2263,11 +2263,11 @@ def interview_agent():
     except TimeoutError as e:
         return jsonify({
             "success": False,
-            "error": f"WaitInterviewResponse timeout: {str(e)}"
+            "error": f"Timed out waiting for the interview response: {str(e)}"
         }), 504
         
     except Exception as e:
-        logger.error(f"InterviewFailed: {str(e)}")
+        logger.error(f"Interview failed: {str(e)}")
         return jsonify({
             "success": False,
             "error": str(e),
@@ -2336,14 +2336,14 @@ def interview_agents_batch():
         if not interviews or not isinstance(interviews, list):
             return jsonify({
                 "success": False,
-                "error": "Please provide interviews（Interview list）"
+                "error": "Please provide interviews (the interview list)"
             }), 400
 
         # VerifyplatformParameters
         if platform and platform not in ("twitter", "reddit"):
             return jsonify({
                 "success": False,
-                "error": "platform Parameter can only be 'twitter' Or 'reddit'"
+                "error": "platform must be 'twitter' or 'reddit'"
             }), 400
 
         # Verify each interview item
@@ -2351,12 +2351,12 @@ def interview_agents_batch():
             if 'agent_id' not in interview:
                 return jsonify({
                     "success": False,
-                    "error": f"Interview list item{i+1}Missing agent_id"
+                    "error": f"Interview list item {i+1} is missing agent_id"
                 }), 400
             if 'prompt' not in interview:
                 return jsonify({
                     "success": False,
-                    "error": f"Interview list item{i+1}Missing prompt"
+                    "error": f"Interview list item {i+1} is missing prompt"
                 }), 400
             # Verify each item'splatform（IfHas）
             item_platform = interview.get('platform')
@@ -2401,11 +2401,11 @@ def interview_agents_batch():
     except TimeoutError as e:
         return jsonify({
             "success": False,
-            "error": f"Wait for batchInterviewResponse timeout: {str(e)}"
+            "error": f"Timed out waiting for the batch interview response: {str(e)}"
         }), 504
 
     except Exception as e:
-        logger.error(f"BatchInterviewFailed: {str(e)}")
+        logger.error(f"Batch interview failed: {str(e)}")
         return jsonify({
             "success": False,
             "error": str(e),
@@ -2463,14 +2463,14 @@ def interview_all_agents():
         if not prompt:
             return jsonify({
                 "success": False,
-                "error": "Please provide prompt（Interview question）"
+                "error": "Please provide a prompt (the interview question)"
             }), 400
 
         # VerifyplatformParameters
         if platform and platform not in ("twitter", "reddit"):
             return jsonify({
                 "success": False,
-                "error": "platform Parameter can only be 'twitter' Or 'reddit'"
+                "error": "platform must be 'twitter' or 'reddit'"
             }), 400
 
         # Check environment status
@@ -2504,11 +2504,11 @@ def interview_all_agents():
     except TimeoutError as e:
         return jsonify({
             "success": False,
-            "error": f"Wait for globalInterviewResponse timeout: {str(e)}"
+            "error": f"Timed out waiting for the global interview response: {str(e)}"
         }), 504
 
     except Exception as e:
-        logger.error(f"GlobalInterviewFailed: {str(e)}")
+        logger.error(f"Global interview failed: {str(e)}")
         return jsonify({
             "success": False,
             "error": str(e),

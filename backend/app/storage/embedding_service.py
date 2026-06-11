@@ -1,5 +1,5 @@
 """
-EmbeddingService — embeddings via any OpenAI-compatible /embeddings endpoint
+EmbeddingService: embeddings via any OpenAI-compatible /embeddings endpoint
 (OpenRouter by default; works with OpenAI, Ollama's /v1, etc.)
 
 Vector dimension is configured via EMBEDDING_DIMENSIONS and must match
@@ -101,7 +101,7 @@ class EmbeddingService:
                 uncached_indices.append(i)
                 uncached_texts.append(text)
             else:
-                # Empty text — zero vector
+                # Empty text: return a zero vector
                 results[i] = [0.0] * self.dimensions
 
         # Batch-embed uncached texts
@@ -185,10 +185,10 @@ class EmbeddingService:
                 last_error = e
                 logger.error(f"Embedding API HTTP error: {e.response.status_code} - {e.response.text}")
                 if e.response.status_code == 429 or e.response.status_code >= 500:
-                    # Rate limit / server error — retry
+                    # Rate limit or server error: retry
                     pass
                 else:
-                    # Other client error (4xx) — don't retry
+                    # Other client error (4xx): don't retry
                     raise EmbeddingError(f"Embedding request failed: {e}") from e
             except (KeyError, ValueError) as e:
                 raise EmbeddingError(f"Invalid embedding API response: {e}") from e
